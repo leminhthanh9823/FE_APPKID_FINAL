@@ -1,0 +1,72 @@
+import Field from '../../../types/field';
+import { GRADE_UC_OPTIONS, STATUS_UC_OPTIONS } from '../options';
+
+export const ReadingEditFields: Field[] = [
+  {
+    name: 'title',
+    label: 'Title',
+    type: 'text',
+    value: '',
+    rowGroup: '0',
+    isRequired: true,
+    colSpan: 12,
+  },
+  {
+    name: 'categories',
+    label: 'Categories',
+    type: 'multi-select',
+    value: [],
+    isRequired: true,
+    colSpan: 12,
+    rowGroup: '1',
+    options: [],
+  },
+  {
+    name: 'description',
+    label: 'Description',
+    type: 'textarea',
+    value: '',
+    isRequired: false,
+    rowGroup: '2',
+    colSpan: 12,
+  },
+
+  {
+    name: 'reference',
+    label: 'Reference',
+    type: 'text',
+    value: '',
+    isRequired: false,
+    rowGroup: '3',
+    colSpan: 12,
+  },
+  {
+    name: 'is_active',
+    label: 'Active?',
+    type: 'select',
+    value: '',
+    isRequired: true,
+    rowGroup: '4',
+    colSpan: 6,
+    options: STATUS_UC_OPTIONS,
+  },
+  {
+    name: 'file',
+    label: 'Video File',
+    type: 'file',
+    value: '',
+    isRequired: true,
+    rowGroup: '5',
+    colSpan: 12,
+    fileAccept: 'video/*',
+  },
+  {
+    name: 'image',
+    label: 'Image',
+    type: 'file',
+    value: '',
+    isRequired: true,
+    rowGroup: '6',
+    colSpan: 12,
+  },
+];

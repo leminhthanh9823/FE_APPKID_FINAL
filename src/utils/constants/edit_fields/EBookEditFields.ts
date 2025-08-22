@@ -1,0 +1,81 @@
+import Field from '../../../types/field';
+import { STATUS_UC_OPTIONS } from '../options';
+
+const EBookEditFields: Field[] = [
+  {
+    name: 'title',
+    label: 'Title',
+    type: 'text',
+    value: '',
+    isRequired: true,
+    rowGroup: '0',
+    colSpan: 12,
+  },
+    {
+    name: 'categories',
+    label: 'Categories',
+    type: 'multi-select',
+    value: [],
+    isRequired: true,
+    colSpan: 12,
+    rowGroup: '1',
+    options: [],
+  },
+  {
+    name: 'description',
+    label: 'Description',
+    type: 'textarea',
+    value: '',
+    isRequired: false,
+    colSpan: 12,
+    rowGroup: '2',
+  },
+  {
+    name: 'reference',
+    label: 'Reference',
+    type: 'text',
+    value: '',
+    isRequired: false,
+    colSpan: 12,
+    rowGroup: '2',
+  },
+  {
+    name: 'image',
+    label: 'Image',
+    type: 'file',
+    value: '',
+    isRequired: true,
+    colSpan: 6,
+    rowGroup: '3',
+  },
+  {
+    name: 'background',
+    label: 'Background Image',
+    type: 'file',
+    value: '',
+    isRequired: true,
+    colSpan: 6,
+    rowGroup: '3',
+  },
+  {
+    name: 'file',
+    label: 'File',
+    type: 'file',
+    value: '',
+    isRequired: true,
+    colSpan: 6,
+    rowGroup: '4',
+  },
+  {
+    name: 'is_active',
+    label: 'Status',
+    type: 'select',
+    value: 1,
+    isRequired: true,
+    colSpan: 6,
+    options: STATUS_UC_OPTIONS,
+    rowGroup: '4',
+  },
+];
+
+export default EBookEditFields;

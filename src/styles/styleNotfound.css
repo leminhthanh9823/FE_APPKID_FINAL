@@ -1,0 +1,37 @@
+.error-container {
+  text-align: center;
+  padding: 100px 20px;
+  background-color: #f8d7da;
+  color: #721c24;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-title {
+  font-size: 100px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.error-text {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.error-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 18px;
+  color: white;
+  background-color: #dc3545;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background 0.3s;
+}
+
+.error-btn:hover {
+  background-color: #c82333;
+}
