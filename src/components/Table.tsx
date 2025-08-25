@@ -1,4 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
+import AdminResetPasswordModal from './AdminResetPasswordModal';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import '../styles/styleTable.css';
@@ -186,7 +187,15 @@ const Table: React.FC<TableProps<any>> = ({
     setCreateField(addFields);
   };
 
+  const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
+  const [resetUserId, setResetUserId] = useState<string | null>(null);
+
   const handleCustomAction = (action: CustomAction, item: any) => {
+    if (action.action === 'Change password') {
+      setResetUserId(item.id);
+      setShowResetPasswordModal(true);
+      return;
+    }
     setCreateTitle(action?.action || 'Create new');
     if (action?.link) {
       const finalUrl =
@@ -614,6 +623,12 @@ const Table: React.FC<TableProps<any>> = ({
         </div>
       </div>
 
+      {showResetPasswordModal && resetUserId && (
+        <AdminResetPasswordModal
+          userId={resetUserId}
+          onClose={() => setShowResetPasswordModal(false)}
+        />
+      )}
       {qrData && (
         <>
           <div
