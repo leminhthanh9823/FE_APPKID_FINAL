@@ -64,7 +64,6 @@ const DetailTeacherFeedback: React.FC = () => {
     isSuccess = await saveChanges(req);
 
     if (isSuccess) {
-      toast.success('Updated successfully.');
     } else {
       toast.error(MESSAGE.UPDATE_FAIL);
       return;
