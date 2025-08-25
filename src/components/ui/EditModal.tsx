@@ -133,47 +133,49 @@ const EditModal: React.FC<EditModalProps> = ({
   };
 
   useEffect(() => {
-    const initialData = Object.fromEntries(
-      fields.map((f) => {
-        const key = f.camelName || f.name;
-        let value = f.value;
-        if (f.type === 'number' && (value === '' || value === null)) {
-          value = null;
-        } else if (f.type === 'select' && f.options) {
-          const matchedOption = f.options.find((opt) => opt.value === value);
-          value = matchedOption || null;
-        } else if (f.type === 'multi-select') {
-          if (Array.isArray(value)) {
-            value = value.map((item) =>
-              typeof item === 'object' && item !== null && 'id' in item
-                ? item.id
-                : item
-            );
-          } else if (
-            typeof value === 'object' &&
-            value !== null &&
-            'id' in value
-          ) {
-            value = [value.id];
-          } else if (value !== null && value !== undefined && value !== '') {
-            value = [value];
-          } else {
-            value = [];
+    if (showModal) {
+      const initialData = Object.fromEntries(
+        fields.map((f) => {
+          const key = f.camelName || f.name;
+          let value = f.value;
+          if (f.type === 'number' && (value === '' || value === null)) {
+            value = null;
+          } else if (f.type === 'select' && f.options) {
+            const matchedOption = f.options.find((opt) => opt.value === value);
+            value = matchedOption || null;
+          } else if (f.type === 'multi-select') {
+            if (Array.isArray(value)) {
+              value = value.map((item) =>
+                typeof item === 'object' && item !== null && 'id' in item
+                  ? item.id
+                  : item
+              );
+            } else if (
+              typeof value === 'object' &&
+              value !== null &&
+              'id' in value
+            ) {
+              value = [value.id];
+            } else if (value !== null && value !== undefined && value !== '') {
+              value = [value];
+            } else {
+              value = [];
+            }
+          } else if (f.type === 'checkbox' && Array.isArray(f.value)) {
+            value = f.value;
+          } else if (f.type === 'datetime-local' && value) {
+            const date = new Date(value);
+            value = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+              .toISOString()
+              .slice(0, 16);
           }
-        } else if (f.type === 'checkbox' && Array.isArray(f.value)) {
-          value = f.value;
-        } else if (f.type === 'datetime-local' && value) {
-          const date = new Date(value);
-          value = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-            .toISOString()
-            .slice(0, 16);
-        }
 
-        return [key, value];
-      })
-    );
-    setFormData(initialData);
-  }, [fields]);
+          return [key, value];
+        })
+      );
+      setFormData(initialData);
+    }
+  }, [showModal, selectedItemId]);
 
   const groupedFields = fields.reduce<Record<string, Field[]>>((acc, field) => {
     const group = field.rowGroup ?? field.name;

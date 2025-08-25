@@ -59,15 +59,7 @@ const DetailTeacherFeedback: React.FC = () => {
       toast.error("Please select required fields!");
       return;
     }
-    let isSuccess = false;
-    isSuccess = await saveChanges(req);
-
-    if (isSuccess) {
-      toast.success('Updated successfully.');
-    } else {
-      toast.error(MESSAGE.UPDATE_FAIL);
-      return;
-    }
+    await saveChanges(req);
   }
 
   return (
