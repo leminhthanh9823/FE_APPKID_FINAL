@@ -184,14 +184,8 @@ const EditQuestion: React.FC = () => {
       };
     }
 
-    let isSuccess = false;
-    isSuccess = await saveChanges(payload);
-    if (isSuccess) {
-      toast.success('Updated successfully.');
-    } else {
-      toast.error(MESSAGE.UPDATE_FAIL);
-      return;
-    }
+    console.log('Payload to submit:', payload);
+    await saveChanges(payload);
   };
 
   const handleDelete = async () => {

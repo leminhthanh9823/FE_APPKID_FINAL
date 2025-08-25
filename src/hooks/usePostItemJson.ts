@@ -18,7 +18,6 @@ const usePostItemJson = (endpoint: string) => {
           "Content-Type": "application/json",
         },
       });
-      if (!response.data.success) throw new Error(MESSAGE.UPDATE_FAIL);
       return true;
     } catch (err: any) {
         toast.error(err || MESSAGE.SERVER_CONNECTION_ERROR);

@@ -3,10 +3,16 @@ import useLogout from '../../hooks/useLogout';
 import '../../styles/index.css';
 import user from '../../assets/user_default.png';
 import { ROUTES } from '../../routers/routes';
+import { useState } from 'react';
+import apiClient from '@/apis/apiRequest';
+import { toast } from 'react-toastify';
+import { useLoading } from '@/hooks/useLoading';
 interface HeaderProps {
   onToggleSidebar: () => void;
 }
 const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
+
+  const { setIsLoading } = useLoading();
   const { logout } = useLogout();
   const handleLogout = () => {
     logout();
@@ -14,6 +20,23 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const userName = localStorage.getItem('displayName');
   const roleName = localStorage.getItem('roleName');
   const email = localStorage.getItem('email');
+
+  const handSendRequestResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const response = await apiClient.post("/auth/forgot-password", { email });
+      if (response.data.success) {
+        toast.success("Password reset request sent! Please check your email.");
+      } else {
+        toast.error(response.data.message || "An error occurred.");
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Server error.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
   return (
     <header id="header" className="header fixed-top d-flex align-items-center">
       <div className="d-flex align-items-center justify-content-between">
@@ -66,7 +89,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
               <li>
                 <a
                   className="dropdown-item d-flex align-items-center"
-                  href={ROUTES.CHANGEPASS}
+                  onClick={handSendRequestResetPassword}
                 >
                   <i className="bi bi-unlock "></i>
                   <span>Change password</span>

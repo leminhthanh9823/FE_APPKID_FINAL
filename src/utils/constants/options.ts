@@ -35,15 +35,9 @@ export const LEVEL_DIFFICULT_OPTIONS = [
 
 export const QUESTION_TYPE_OPTIONS = [
   { value: '', label: 'Please choose a type' },
-  { value: 'Video', label: 'Video' },
+  { value: 'Reading', label: 'Reading' },
   { value: 'Multiple Choice', label: 'Multiple Choice' },
   { value: 'Single Choice', label: 'Single Choice' },
-  { value: 'Matched', label: 'Matched' },
-  { value: 'Fill Word', label: 'Fill Word' },
-  { value: 'Fill Blank', label: 'Fill Blank' },
-  { value: 'Jigsaw Puzzle', label: 'Jigsaw Puzzle' },
-  { value: 'Fill Table', label: 'Fill Table' },
-  { value: 'Crossword Puzzle', label: 'Crossword Puzzle' },
 ];
 
 export const COMPLETION_OPTIONS = [

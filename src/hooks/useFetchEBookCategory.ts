@@ -8,6 +8,7 @@ interface FetchParams {
   pageNumb?: number | null;
   pageSize?: number | null;
   searchTerm?: string | null;
+  isActive?: boolean | null;
 }
 
 interface ApiResponse<T> {

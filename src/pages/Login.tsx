@@ -54,10 +54,7 @@ const Login: React.FC = () => {
     try {
       const result = await login(loginId, password);
       if (result?.success) {
-        toast.success("Login Success!");
-        setTimeout(() => {
           window.location.href = ROUTES.DASHBOARD;
-        }, 1500);
       } else {
         toast.error(result?.errors?.[0] || result?.message || "Login failed");
       }

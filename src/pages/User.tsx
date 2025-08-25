@@ -201,7 +201,7 @@ const User: React.FC = () => {
             loadingMessage="Loading users..."
             trueLabel="Active"
             falseLabel="Inactive"
-            customActions={isAdmin() ? UserChangePassAction : []} // Chỉ Admin mới thấy custom actions
+            customActions={isAdmin() ? UserChangePassAction : []}
           />
 
           {/* Pagination */}

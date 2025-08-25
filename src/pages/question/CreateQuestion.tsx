@@ -24,10 +24,10 @@ const CreateQuestion: React.FC = () => {
   const { kid_reading_id } = useParams<{ kid_reading_id: string }>();
   const [reqQuesCreate, setReqQuesCreate] = useState<ICreateQuestionRequest>({
     kid_reading_id: kid_reading_id ? Number(kid_reading_id) : 0,
-    question_level_id: 0,
+    question_level_id: LEVEL_DIFFICULT_OPTIONS[0].value,
     question: '',
     question_type: '',
-    is_active: 0,
+    is_active: 1,
     options: [],
   });
   const [reqOptionsCreate, setReqOptionsCreate] = useState<
@@ -163,16 +163,13 @@ const CreateQuestion: React.FC = () => {
     let isSuccess = false;
     isSuccess = await saveChanges(payload);
     if (isSuccess) {
-      toast.success('Updated successfully.');
+      toast.success('Create question successfully.');
       setIsCreated(true);
       setTimeout(() => {
         window.location.href = buildRoute(ROUTES.QUESTIONS, {
           id: kid_reading_id || '',
         });
       }, 2000);
-    } else {
-      toast.error(MESSAGE.ADD_FAIL);
-      return;
     }
   };
 
