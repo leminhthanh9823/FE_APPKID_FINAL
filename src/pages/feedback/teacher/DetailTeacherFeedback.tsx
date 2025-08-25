@@ -55,19 +55,11 @@ const DetailTeacherFeedback: React.FC = () => {
       toast.error("Please fill in all required fields.");
       return;
     }
-    console.log(req.status_solve)
     if ( (typeTeacher == 0  && req.status_solve == null) || (typeTeacher == 1 && req.status_confirm == null)) {
       toast.error("Please select required fields!");
       return;
     }
-    let isSuccess = false;
-    isSuccess = await saveChanges(req);
-
-    if (isSuccess) {
-    } else {
-      toast.error(MESSAGE.UPDATE_FAIL);
-      return;
-    }
+    await saveChanges(req);
   }
 
   return (
