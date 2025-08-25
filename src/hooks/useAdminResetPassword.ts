@@ -1,28 +1,42 @@
 import { useState } from 'react';
-import { resetPasswordByAdmin } from '../apis/resetPasswordByAdmin';
+import { useLoading } from './useLoading';
+import apiClient from '@/apis/apiRequest';
+import { toast } from 'react-toastify';
+
+interface ApiResponse{
+  success: boolean;
+  data: {
+  };
+  status: number;
+}
 
 export const useAdminResetPassword = () => {
-  const [loading, setLoading] = useState(false);
+  const { setIsLoading } = useLoading();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   const resetPassword = async (id: string, newPassword: string) => {
-    setLoading(true);
+    setIsLoading(true);
     setError(null);
     setSuccess(false);
     try {
-      const res = await resetPasswordByAdmin(id, newPassword);
-      if (res.data.success) {
-        setSuccess(true);
-      } else {
-        setError(res.data.message || 'Reset failed');
+      let response = await apiClient.post<ApiResponse>(
+        '/auth/admin/reset-password',
+        {
+          id,
+          newPassword
+        }
+      );  
+
+      if (response.data.success) {
+        toast.success("Password reset successfully!");
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message);
+      toast.error(err);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  return { resetPassword, loading, error, success };
+  return { resetPassword, error, success };
 };
