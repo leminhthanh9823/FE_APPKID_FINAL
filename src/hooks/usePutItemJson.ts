@@ -22,7 +22,6 @@ const usePutItemJson = (endpoint: string) => {
         toast.success(response.data.message);
         return true;
       } 
-      if (!response.data.success) throw new Error(MESSAGE.UPDATE_FAIL);
       return true;
     } catch (err: any) {
         setError(err || MESSAGE.SERVER_CONNECTION_ERROR);

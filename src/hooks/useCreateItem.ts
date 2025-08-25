@@ -33,9 +33,9 @@ const useCreateItem = (endpoint: string, formData: any) => {
         },
       });
 
-      if (!response.data.success) {
-        throw new Error(MESSAGE.ADD_FAIL);
-      }
+      // if (!response.data.success) {
+      //   throw new Error(MESSAGE.ADD_FAIL);
+      // }
 
       return true;
     } catch (err: any) {

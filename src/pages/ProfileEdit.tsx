@@ -152,12 +152,6 @@ const ProfileEdit = () => {
                 ],
                 required: false
               },
-              {
-                label: 'New Password (if you want to change)',
-                name: 'password',
-                type: 'password',
-                required: false
-              },
             ].map(({ label, name, type, required, options, disabled }) => (
               <div style={{ marginBottom: '1rem' }} key={name}>
                 <label

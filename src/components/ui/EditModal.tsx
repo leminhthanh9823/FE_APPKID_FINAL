@@ -426,7 +426,7 @@ const EditModal: React.FC<EditModalProps> = ({
                                   <div className="mt-2">
                                     {formData[
                                       field.camelName || field.name
-                                    ].match(/\.(jpeg|jpg|png|gif)$/i) ? (
+                                    ].match(/\.(jpeg|jpg|png|gif|jfif)$/i) ? (
                                       <img
                                         src={
                                           formData[
