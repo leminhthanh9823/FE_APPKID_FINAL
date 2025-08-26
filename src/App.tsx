@@ -46,6 +46,7 @@ export function App() {
       <Suspense fallback={<LoadingScreen />}>
         <Routes>
           <Route path={ROUTES.LOGIN} element={<Login />} />
+          <Route path={ROUTES.LOGIN2} element={<Login />} />
 
           <Route path={ROUTES.FORGOTPASS} element={<ForgotPassword />} />
           <Route path={ROUTES.CHANGEPASS} element={<ForgotPassword />} />

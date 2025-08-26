@@ -19,6 +19,7 @@ export const ROUTES = {
   REVENUE_EXPENSE: '/expense',
   LEDGER: '/ledger',
   LOGIN: '/',
+  LOGIN2: '/login',
   FORGOTPASS: '/forgot-password',
   VERIFYCODE: '/verify-code',
   RESETPASS: '/reset-password',

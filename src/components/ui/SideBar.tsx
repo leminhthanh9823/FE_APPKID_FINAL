@@ -166,7 +166,7 @@ const SideBar: React.FC = () => {
                   </a>
                 </li>
               )}
-              {permissions.canAccessTeachers && (
+              {/* {permissions.canAccessTeachers && (
                 <li>
                   <a
                     href={ROUTES.TEACHER}
@@ -178,7 +178,7 @@ const SideBar: React.FC = () => {
                     <span>Teachers</span>
                   </a>
                 </li>
-              )}
+              )} */}
             </ul>
           </li>
         )}
