@@ -92,7 +92,6 @@ const StudentOptions = React.forwardRef<StudentOptionsRef, StudentOptionsProps>(
           />
         </div>
         <Table
-          tableName="List of students"
           columns={StudentSelectColumns}
           data={data}
           onSearch={(term) => {

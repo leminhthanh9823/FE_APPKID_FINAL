@@ -85,7 +85,6 @@ const EditNotification: React.FC = () => {
 
     let isSuccess = await saveChanges(payload);
     if (isSuccess) {
-      toast.success("Notification updated successfully.");
       setTimeout(() => {
         window.location.href = ROUTES.NOTIFICATION;
       }, 5000);
