@@ -25,11 +25,7 @@ const useLogin = () => {
       }
       return data;
     } catch (error: any) {
-      if (error.response && error.response.data) {
-        return error.response.data;
-      }
-
-      return { success: false, message: error || "System error!" };
+      toast.error(error);
     } finally {
       setIsLoading(false);
     }

@@ -51,16 +51,10 @@ const Login: React.FC = () => {
       Cookies.remove("rememberMe");
     }
 
-    try {
       const result = await login(loginId, password);
       if (result?.success) {
-          window.location.href = ROUTES.DASHBOARD;
-      } else {
-        toast.error(result?.errors?.[0] || result?.message || "Login failed");
+        window.location.href = ROUTES.DASHBOARD;
       }
-    } catch (err: any) {
-      toast.error(err?.message || "Server connection error");
-    }
   };
 
   return (

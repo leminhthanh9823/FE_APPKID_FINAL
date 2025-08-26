@@ -11,8 +11,8 @@ const ForgotPassword = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email) {
-      toast.error("Please enter your email.");
+    if (!validateEmail(email)) {
+      toast.error("Please enter valid your email.");
       return;
     }
 
@@ -21,14 +21,17 @@ const ForgotPassword = () => {
       const response = await apiClient.post("/auth/forgot-password", { email });
       if (response.data.success) {
         toast.success("Password reset request sent! Please check your email.");
-      } else {
-        toast.error(response.data.message || "An error occurred.");
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Server error.");
+      toast.error(err || "Server error.");
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const validateEmail = (email: string) => {
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return regex.test(email);
   };
 
   return (
