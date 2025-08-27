@@ -113,6 +113,11 @@ const DetailAssignFeedback: React.FC = () => {
       toast.error("Please select required fields!");
       return;
     }
+
+    if(req.solver_id === req.confirmer_id) {
+      toast.error("Solver and confirmer must be different!");
+      return;
+    }
     await saveChanges(req);
   }
 
