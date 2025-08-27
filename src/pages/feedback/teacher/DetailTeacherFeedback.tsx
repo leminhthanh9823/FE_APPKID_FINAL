@@ -88,7 +88,7 @@ const DetailTeacherFeedback: React.FC = () => {
             boxShadow: '0px 0px 20px #8c98a4',
           }}
         >
-          <h3>Thông tin feedback</h3>
+          <h3>Information feedback</h3>
           <div className={`col-12 mb-3 row`}>
             <div className={`col-4`}>
               <label className="form-label">
@@ -100,7 +100,8 @@ const DetailTeacherFeedback: React.FC = () => {
                       day: '2-digit',
                       hour: '2-digit',
                       minute: '2-digit',
-                      hour12: false
+                      hour12: false,
+                      second: '2-digit',
                     })
                   : ''}
               </label>
@@ -180,7 +181,7 @@ const DetailTeacherFeedback: React.FC = () => {
             </div>
           </div>
 
-          <h3>Thông tin xử lý</h3>
+          <h3>Information processing</h3>
           <div className={`col-12 mt-3 mb-3 row`}>
             <div className={`col-2`}>
               <label className="form-label">

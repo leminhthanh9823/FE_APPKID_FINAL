@@ -357,6 +357,7 @@ const DetailAssignFeedback: React.FC = () => {
               <div>
                 <Select
                   id="status-filter"
+                  isDisabled={true}
                   onChange={(option) => handleInputChange('solver_id', option?.value)}
                   value={FEEDBACK_STATUS_SOLVE_OPTIONS}
                   placeholder="Select teacher to solve an issue"

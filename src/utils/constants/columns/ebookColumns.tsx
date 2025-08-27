@@ -72,22 +72,22 @@ export const EBookColumns: Column[] = [
       </span>
     ),
   },
-  {
-    key: 'updated_at',
-    label: 'Last Updated',
-    format: (value: string) => {
-      if (!value) return 'N/A';
-      const date = new Date(value.replace(' ', 'T'));
-      if (isNaN(date.getTime())) return 'Invalid Date';
-      return date.toLocaleString('vi-VN', {
-        hour12: false,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-      });
-    },
-  },
+  // {
+  //   key: 'updated_at',
+  //   label: 'Last Updated',
+  //   format: (value: string) => {
+  //     if (!value) return 'N/A';
+  //     const date = new Date(value.replace(' ', 'T'));
+  //     if (isNaN(date.getTime())) return 'Invalid Date';
+  //     return date.toLocaleString('vi-VN', {
+  //       hour12: false,
+  //       year: 'numeric',
+  //       month: '2-digit',
+  //       day: '2-digit',
+  //       hour: '2-digit',
+  //       minute: '2-digit',
+  //       second: '2-digit',
+  //     });
+  //   },
+  // },
 ];

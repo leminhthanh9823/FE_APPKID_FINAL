@@ -37,13 +37,13 @@ export const getUserColumns = (isAdmin: boolean = true) => [
       <TruncatedText text={value} maxLength={15} maxWidth="100px" />
     ),
   },
-  {
-    key: 'dob',
-    label: 'DOB',
-    format: (value: any) => (
-      <TruncatedText text={value} maxLength={12} maxWidth="90px" />
-    ),
-  },
+  // {
+  //   key: 'dob',
+  //   label: 'DOB',
+  //   format: (value: any) => (
+  //     <TruncatedText text={value} maxLength={12} maxWidth="90px" />
+  //   ),
+  // },
   {
     key: 'role_id',
     label: 'Role',
@@ -64,13 +64,13 @@ export const getUserColumns = (isAdmin: boolean = true) => [
           </span>
         ),
   },
-  {
-    key: 'created_at',
-    label: 'Registered at',
-    format: (value: any) => (
-      <TruncatedText text={value} maxLength={20} maxWidth="130px" />
-    ),
-  },
+  // {
+  //   key: 'created_at',
+  //   label: 'Registered at',
+  //   format: (value: any) => (
+  //     <TruncatedText text={value} maxLength={20} maxWidth="130px" />
+  //   ),
+  // },
 ];
 
 // Backward compatibility
