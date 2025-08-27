@@ -14,6 +14,7 @@ import useFetchTeacher from '@/hooks/useFetchTeacher';
 import { ITeacherRecord } from '@/pages/Teacher';
 import usePutItemJson from '@/hooks/usePutItemJson';
 import { MESSAGE } from '@/utils/constants/errorMessage';
+import { formatDateTime } from '@/utils/helper/formatDateTime';
 
 const DetailTeacherFeedback: React.FC = () => {
   const { id: feedbackId } = useParams<{ id: string }>();
@@ -91,10 +92,16 @@ const DetailTeacherFeedback: React.FC = () => {
           <div className={`col-12 mb-3 row`}>
             <div className={`col-4`}>
               <label className="form-label">
-                {response?.created_at
-                  ? typeof response.created_at === 'string'
-                    ? response.created_at
-                    : response.created_at.toLocaleString()
+                Created at: {response?.created_at
+                  ? new Date(response.created_at).toLocaleString('vi-VN', {
+                      timeZone: 'Asia/Ho_Chi_Minh',
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false
+                    })
                   : ''}
               </label>
             </div>
