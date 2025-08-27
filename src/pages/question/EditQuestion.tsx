@@ -32,7 +32,7 @@ const EditQuestion: React.FC = () => {
   });
   const { data: isPracticedData } = useFetchItem(
     `${ENDPOINT.QUESTIONS}/cms/check-is-practiced`,
-    { id: questionId }
+    { id: kid_reading_id }
   );
   const [reqEdit, setReqEdit] = useState<IGetEditQuestionResponse | null>(null);
   const [isPracticed, setIsPracticed] = useState<boolean>(false);
@@ -182,6 +182,11 @@ const EditQuestion: React.FC = () => {
         question_level_id: reqEdit.question_level_id,
         is_active: reqEdit.is_active,
       };
+    }
+    payload = {
+      ...payload,
+      id: reqEdit.id,
+      kid_reading_id: reqEdit.kid_reading_id,
     }
 
     console.log('Payload to submit:', payload);
