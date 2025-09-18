@@ -110,6 +110,22 @@ const SideBar: React.FC = () => {
                   </a>
                 </li>
               )}
+
+            {permissions.canAccessLearningPaths && (
+              <li>
+                <a
+                  href={ROUTES.LEARNING_PATH}
+                  className={
+                    location.pathname === ROUTES.LEARNING_PATH
+                      ? 'active'
+                      : ''
+                  }
+                >
+                  <i className="bi bi-circle"></i>
+                  <span>Learning Paths</span>
+                </a>
+              </li>
+            )}
             </ul>
           </li>
         )}

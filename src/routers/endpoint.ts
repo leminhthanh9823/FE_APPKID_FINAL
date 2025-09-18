@@ -25,4 +25,5 @@ export const ENDPOINT = {
   STUDENT_READING: "/student-reading",
   NOTIFY: '/notify',
   FEEDBACK: '/feedback',
+  LEARNING_PATH: '/learning-path',
 };

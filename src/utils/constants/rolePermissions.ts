@@ -18,6 +18,7 @@ export const ROLE_PERMISSIONS = {
     canManageQuestions: false,
     canViewLearningHistories: false,
     canUpdateProfile: true,
+    canManageLearningPaths: false,
   },
 
   // Teacher permissions - Manage students, teachers (view only), teacher feedback, notifications and books
@@ -38,6 +39,7 @@ export const ROLE_PERMISSIONS = {
     canManageQuestions: true,
     canViewLearningHistories: true,
     canUpdateProfile: true,
+    canManageLearningPaths: true,
   },
 };
 

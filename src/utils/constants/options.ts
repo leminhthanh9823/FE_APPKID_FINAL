@@ -113,3 +113,12 @@ export const FEEDBACK_STATUS_OPTIONS = [
   { value: 2, label: 'Resolved' },
   { value: 3, label: 'Rejected' },
 ]
+
+export const DIFFICULTY_OPTIONS = [
+  { value: null, label: 'All Levels' },
+  { value: 1, label: 'Level 1' },
+  { value: 2, label: 'Level 2' },
+  { value: 3, label: 'Level 3' },
+  { value: 4, label: 'Level 4' },
+  { value: 5, label: 'Level 5' },
+];
