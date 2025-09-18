@@ -9,9 +9,9 @@ import { ENDPOINT } from '@/routers/endpoint';
 import useFetchLearningPath from '@/hooks/useFetchLearningPath';
 import { LearningPathColumns } from '@/utils/constants/columns/learningPath/learningPathColumns';
 import LearningPathCreateFields from '@/utils/constants/create_fields/LearningPathCreateFields';
+import LearningPathEditFields from '@/utils/constants/edit_fields/learningPathEditFields';
 import { buildRoute } from '@/utils/helper/routeHelper';
 import { ROUTES } from '@/routers/routes';
-import Field from '@/types/field';
 const LearningPaths = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
@@ -140,6 +140,7 @@ const LearningPaths = () => {
             </div>
           }
           createFields={LearningPathCreateFields}
+          editFields={LearningPathEditFields}
           columns={LearningPathColumns}
           isEditable={false}
           isDeletable={false}
@@ -157,7 +158,7 @@ const LearningPaths = () => {
           customActions={[
             {
               action: "Edit info",
-              link: (row) => buildRoute(ROUTES.EDIT_LEARNING_PATH, { id: row.id }),
+              openModal: true,
             },
             {
               action: "Edit items",
