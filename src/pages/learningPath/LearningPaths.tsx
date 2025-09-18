@@ -8,8 +8,10 @@ import Select from 'react-select';
 import { ENDPOINT } from '@/routers/endpoint';
 import useFetchLearningPath from '@/hooks/useFetchLearningPath';
 import { LearningPathColumns } from '@/utils/constants/columns/learningPath/learningPathColumns';
+import LearningPathCreateFields from '@/utils/constants/create_fields/LearningPathCreateFields';
 import { buildRoute } from '@/utils/helper/routeHelper';
 import { ROUTES } from '@/routers/routes';
+import Field from '@/types/field';
 const LearningPaths = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,7 +22,6 @@ const LearningPaths = () => {
       localStorage.getItem(`${Constants.LOCAL_STORAGE_KEY}-${ENDPOINT.LEARNING_PATH}`)
     ) || 10
   );
-
   const { data, totalRecords, totalPages, setParams } = useFetchLearningPath(
     `${ENDPOINT.LEARNING_PATH}/cms/all`,
     {
@@ -138,7 +139,7 @@ const LearningPaths = () => {
                 </div>
             </div>
           }
-
+          createFields={LearningPathCreateFields}
           columns={LearningPathColumns}
           isEditable={false}
           isDeletable={false}
@@ -148,7 +149,7 @@ const LearningPaths = () => {
             setCurrentPage(1);
             handleParamsChange(1, pageSize, term, selectedDifficultLevel, selectedStatus);
           }}
-          endpoint={ENDPOINT.NOTIFY}
+          endpoint={ENDPOINT.LEARNING_PATH}
           isCreatable={true}
           isImportable={false}
           isToggleable={true}
