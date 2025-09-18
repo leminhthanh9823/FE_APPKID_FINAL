@@ -6,4 +6,5 @@ export interface CustomAction {
   onClick?: (item: any) => void;
   customFields?: Field[];
   customPath?: string;
+  openModal?: boolean;
 }

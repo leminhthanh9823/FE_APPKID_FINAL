@@ -202,6 +202,9 @@ const Table: React.FC<TableProps<any>> = ({
         typeof action.link === 'function' ? action.link(item) : action.link;
       window.location.href = finalUrl;
     }
+    if(action?.openModal) {
+      handleEdit(item);
+    }
   };
 
   const handleSearch = () => {
