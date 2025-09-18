@@ -51,4 +51,7 @@ export const ROUTES = {
   FEEDBACK_ADMIN_DETAIL: '/feedback-admin/:id',
   FEEDBACK_TEACHER: '/feedback-teacher',
   FEEDBACK_TEACHER_DETAIL: '/feedback-teacher/:id',
+  LEARNING_PATH: '/learning-path',
+  EDIT_LEARNING_PATH: '/learning-path/:id/edit',
+  EDIT_ITEMS_LEARNING_PATH: '/learning-path/:id/items',
 };

@@ -48,6 +48,7 @@ export const usePermissions = () => {
 
       canAccessFeedbackAdmin: hasPermission('canManageFeedbackAdmin'),
       canAccessFeedbackTeacher: hasPermission('canManageFeedbackTeacher'),
+      canAccessLearningPaths: hasPermission('canManageLearningPaths'),
     };
   };
 
