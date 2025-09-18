@@ -28,19 +28,7 @@ export const LearningPathColumns = [
     key: "difficulty_level",
     label: "Difficulty",
     format: (value: number | null | undefined) => {
-      const level = Math.max(1, Math.min(5, Math.round(Number(value) || 0)));
-      const stars = [] as React.ReactNode[];
-
-      for (let i = 1; i <= 5; i++) {
-        const filled = i <= level;
-        stars.push(
-          <span key={i} style={{ color: filled ? '#ffc107' : '#e4e5e9', marginRight: 4 }}>
-            <i className={filled ? 'bi bi-star-fill' : 'bi bi-star'} aria-hidden />
-          </span>
-        );
-      }
-
-      return <div style={{ display: 'inline-block' }}>{stars}</div>;
+      return <>{value}</>
     },
   },
   {
