@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { GameProvider } from './stores/contexts/GameContext';
 import { ROUTES } from './routers/routes';
 import PrivateRoute, { UserRole } from './routers/PrivateRoute';
 import { useLoading } from './hooks/useLoading';
@@ -34,6 +35,10 @@ import FeedbackTeacher from './pages/feedback/teacher/FeedbackTeacher';
 import DetailTeacherFeedback from './pages/feedback/teacher/DetailTeacherFeedback';
 import LearningPaths from './pages/learningPath/LearningPaths';
 import EditItems from './pages/learningPath/EditItems';
+import GamesPage from './pages/games/GamesPage';
+import CreateGamePage from './pages/games/CreateGamePage';
+import GameEdit from './pages/games/GameEdit';
+import AssignWordsPage from './pages/games/AssignWordsPage';
 
 const NotFound = lazy(() => import('./pages/NotFound'));
 const ForgotPass = lazy(() => import('./pages/ForgotPass'));
@@ -44,8 +49,9 @@ export function App() {
   const { isLoading } = useLoading();
   return (
     <BrowserRouter>
-      {isLoading && <LoadingScreen />}
-      <Suspense fallback={<LoadingScreen />}>
+      <GameProvider>
+        {isLoading && <LoadingScreen />}
+        <Suspense fallback={<LoadingScreen />}>
         <Routes>
           <Route path={ROUTES.LOGIN} element={<Login />} />
           <Route path={ROUTES.LOGIN2} element={<Login />} />
@@ -128,6 +134,16 @@ export function App() {
               />
               <Route path={ROUTES.LEARNING_PATH} element={<LearningPaths />} />
               <Route path={ROUTES.EDIT_ITEMS_LEARNING_PATH} element={<EditItems />} />
+              
+              {/* Game Management Routes */}
+              {/* Game Management Routes */}
+              <Route path={ROUTES.GAMES} element={<GamesPage />} />
+              <Route path={ROUTES.GAMES_BY_READING} element={<GamesPage />} />
+              <Route path={ROUTES.CREATE_GAME} element={<CreateGamePage />} />
+              <Route path={ROUTES.EDIT_GAME} element={<GameEdit />} />
+
+              {/* Word Management Routes */}
+              <Route path={ROUTES.ASSIGN_WORDS} element={<AssignWordsPage />} />
             </Route>
           </Route>
           {/* Remove old commented code and add proper protected routes */}
@@ -135,6 +151,7 @@ export function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
+      </GameProvider>
     </BrowserRouter>
   );
 }

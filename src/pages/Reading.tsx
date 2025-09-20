@@ -325,6 +325,10 @@ const Reading: React.FC = () => {
                 action: 'View questions',
                 link: (row) => buildRoute(ROUTES.QUESTIONS, { id: row.id }),
               },
+              {
+                action: 'View games',
+                link: (row) => buildRoute(ROUTES.GAMES_BY_READING, { id: row.id }),
+              },
             ]}
           />
           <Pagination
