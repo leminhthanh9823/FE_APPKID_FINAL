@@ -8,7 +8,7 @@ import Select from 'react-select';
 import { ENDPOINT } from '@/routers/endpoint';
 import useFetchLearningPath from '@/hooks/useFetchLearningPath';
 import { LearningPathColumns } from '@/utils/constants/columns/learningPath/learningPathColumns';
-import LearningPathCreateFields from '@/utils/constants/create_fields/LearningPathCreateFields';
+import LearningPathCreateFields from '@/utils/constants/create_fields/learningPathCreateFields';
 import LearningPathEditFields from '@/utils/constants/edit_fields/learningPathEditFields';
 import { buildRoute } from '@/utils/helper/routeHelper';
 import { ROUTES } from '@/routers/routes';
