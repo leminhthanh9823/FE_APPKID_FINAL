@@ -48,7 +48,7 @@ const SideBar: React.FC = () => {
                 location.pathname.startsWith(ROUTES.EBOOK_CATEGORY) ||
                 location.pathname.startsWith(ROUTES.READING) ||
                 location.pathname.startsWith(ROUTES.READING_CATEGORY) ||
-                location.pathname.startsWith('/vehicle')
+                location.pathname.startsWith(ROUTES.LEARNING_PATH)
                   ? 'show'
                   : ''
               }`}
