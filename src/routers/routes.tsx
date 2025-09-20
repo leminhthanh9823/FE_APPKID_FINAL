@@ -1,4 +1,5 @@
 export const ROUTES = {
+  // Core Routes
   SIDEBAR: '/sidebar',
   HEADER: '/header',
   PROFILE: '/profile',
@@ -54,4 +55,15 @@ export const ROUTES = {
   LEARNING_PATH: '/learning-path',
   EDIT_LEARNING_PATH: '/learning-path/:id/edit',
   EDIT_ITEMS_LEARNING_PATH: '/learning-path/:id/items',
+  
+  // Game Management Routes
+  GAMES: '/games',
+  GAMES_BY_READING: '/reading/:id/games',
+  CREATE_GAME: '/reading/:id/games/create',
+  EDIT_GAME: '/reading/:id/games/:gameId/edit',
+
+  // Word Management Routes
+  WORDS: '/word',
+  CREATE_WORD: '/word/',
+  ASSIGN_WORDS: '/word/game/:gameId/words',
 };

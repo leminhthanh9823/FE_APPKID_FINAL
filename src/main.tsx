@@ -13,6 +13,19 @@ import "quill/dist/quill.bubble.css";
 import "simple-datatables/dist/style.css";
 import { LoadingProvider } from "./stores/contexts/LoadingContext";
 
+// Suppress react-beautiful-dnd defaultProps warning
+// This is a temporary solution until the library is updated
+const originalConsoleError = console.error;
+console.error = (...args: any[]) => {
+  if (
+    typeof args[0] === 'string' &&
+    args[0].includes('Support for defaultProps will be removed from memo components')
+  ) {
+    return;
+  }
+  originalConsoleError(...args);
+};
+
 const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
