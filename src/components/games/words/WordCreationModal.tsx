@@ -1,7 +1,7 @@
 import { Modal, Form, Input, Select, message } from 'antd';
 import { useState } from 'react';
 import { Word, WordType } from '@/types/word';
-import axios from 'axios';
+import apiClient from '@/apis/apiRequest';
 
 interface CreateWordRequest {
   word: string;
@@ -28,7 +28,7 @@ const WordCreationModal: React.FC<WordCreationModalProps> = ({
   const handleSubmit = async (values: CreateWordRequest) => {
     try {
       setLoading(true);
-      const response = await axios.post('/api/word', values);
+      const response = await apiClient.post('/api/word', values);
       if (response.data) {
         message.success('Word created successfully');
         onSuccess(response.data);
