@@ -16,6 +16,7 @@ const GamesPage: React.FC = () => {
     updateGame,
     deleteGame,
     changeGameStatus,
+    reorderGames,
   } = useGameManagement();
 
   useEffect(() => {
@@ -55,6 +56,14 @@ const GamesPage: React.FC = () => {
     }
   };
 
+  const handleReorderGames = async (reorderedGames: Game[]) => {
+    try {
+      await reorderGames(reorderedGames);
+    } catch (error) {
+      message.error('Failed to reorder games');
+    }
+  };
+
   const { id } = useParams();
   const readingId = id;
 
@@ -90,6 +99,7 @@ const GamesPage: React.FC = () => {
           onEditGame={handleEditGame}
           onDeleteGame={handleDeleteGame}
           onStatusChange={handleStatusChange}
+          onReorderGames={handleReorderGames}
         />
       </div>
     </main>

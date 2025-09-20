@@ -15,6 +15,7 @@ export interface Game {
   name: string;
   description?: string;
   type: number;
+  image?: string;
   prerequisite_reading_id: number;
   sequence_order: number;
   is_active: number;
@@ -27,12 +28,14 @@ export interface CreateGameDto {
   name: string;
   description?: string;
   type: number;
+  image?: string;
 }
 
 export interface UpdateGameDto {
   name?: string;
   description?: string;
   type?: number;
+  image?: string;
 }
 
 export enum GameStatus {
