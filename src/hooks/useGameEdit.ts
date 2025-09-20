@@ -25,45 +25,31 @@ interface GameWordAssignment {
 export const useGameEdit = (gameId: string) => {
   const [game, setGame] = useState<Game | null>(null);
   const [allWords, setAllWords] = useState<Word[]>([]);
-  const [gameWords, setGameWords] = useState<Word[]>([]); // Changed to Word[] as API returns assigned words
-  const [loading, setLoading] = useState(true);  // Start with loading true
+  const [gameWords, setGameWords] = useState<Word[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Ensure data is always an array
   const ensureArray = <T>(data: any): T[] => {
-    console.log('ensureArray input:', data);
-    console.log('data type:', typeof data, Array.isArray(data));
-    console.log('data.words:', data?.words, Array.isArray(data?.words));
-    console.log('data.items:', data?.items, Array.isArray(data?.items));
     
     if (Array.isArray(data)) {
-      console.log('Returning data directly');
       return data;
     }
     if (data?.words && Array.isArray(data.words)) {
-      console.log('Returning data.words');
       return data.words;
     }
     if (data?.items && Array.isArray(data.items)) {
-      console.log('Returning data.items');
       return data.items;
     }
-    console.log('Returning empty array');
     return [];
   };
 
-  // Fetch game details
   const fetchGame = async () => {
     try {
       const response = await apiClient.get(`/game/teacher/games/${gameId}`);
-      console.log('Fetch game response:', response.data);
       if (response.data.success) {
         const gameData = response.data.data;
-        console.log('Game data loaded:', gameData);
         setGame(gameData);
         
-        // Check if game has words data included
         if (gameData.words && Array.isArray(gameData.words)) {
-          console.log('Game includes words:', gameData.words);
           setGameWords(gameData.words);
         }
       } else {
@@ -82,14 +68,10 @@ export const useGameEdit = (gameId: string) => {
     try {
       setLoading(true);
       const response = await apiClient.get('/word');
-      console.log('Fetch all words response:', response.data);
-      console.log('Response data structure:', response.data.data);
       if (response.data.success) {
         const words = ensureArray<Word>(response.data.data);
-        console.log('All words loaded:', words.length, words);
         setAllWords(words);
       } else {
-        console.error('Failed to load words - success false');
         setAllWords([]);
       }
     } catch (error) {
@@ -104,32 +86,53 @@ export const useGameEdit = (gameId: string) => {
     try {
       setLoading(true);
       const response = await apiClient.get(`/word/game/${gameId}/words`);
-      console.log('Fetch game words response:', response.data);
       if (response.data.success) {
         const gameWords = ensureArray<Word>(response.data.data);
-        console.log('Game words loaded:', gameWords.length);
         setGameWords(gameWords);
       } else {
-        console.error('Failed to load game words - success false');
         setGameWords([]);
       }
     } catch (error) {
-      console.error('Failed to load game words:', error);
-      // Don't show error message as this endpoint might not exist yet
       setGameWords([]);
     }
   };
 
   // Update game details
-  const updateGame = async (values: Partial<Game>) => {
+  const updateGame = async (values: any) => {
     try {
       setLoading(true);
-      const response = await apiClient.put(`/game/teacher/games/${gameId}`, values);
+      
+      // Create FormData for handling file uploads
+      const formData = new FormData();
+      
+      // Add all form values to FormData
+      Object.keys(values).forEach(key => {
+        if (key === 'image' && values[key]) {
+          // Handle image upload - get the file from fileList
+          const fileList = values[key];
+          if (fileList && fileList.length > 0) {
+            const file = fileList[0].originFileObj || fileList[0];
+            if (file instanceof File) {
+              formData.append('image', file);
+            }
+          }
+        } else if (values[key] !== undefined && values[key] !== null) {
+          formData.append(key, values[key]);
+        }
+      });
+
+      const response = await apiClient.put(`/game/teacher/games/${gameId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
       if (response.data.success) {
         setGame(response.data.data);
         message.success('Game updated successfully');
       }
     } catch (error) {
+      console.error('Failed to update game:', error);
       message.error('Failed to update game');
     } finally {
       setLoading(false);

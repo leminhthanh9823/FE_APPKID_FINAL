@@ -1,5 +1,7 @@
-import { Form, Input, Select, Button, Card } from 'antd';
+import { Form, Input, Select, Button, Card, Upload, message } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
 import { useState } from 'react';
+import type { UploadProps } from 'antd';
 
 const { TextArea } = Input;
 
@@ -7,6 +9,7 @@ interface GameFormData {
   name: string;
   description?: string;
   type: number;
+  image?: any;
 }
 
 interface GameCreationFormProps {
@@ -82,6 +85,44 @@ export const GameCreationForm: React.FC<GameCreationFormProps> = ({
                 </Select.Option>
               ))}
             </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="image"
+            label="Game Image"
+            valuePropName="fileList"
+            getValueFromEvent={(e) => {
+              if (Array.isArray(e)) {
+                return e;
+              }
+              return e?.fileList;
+            }}
+          >
+            <Upload
+              name="image"
+              listType="picture-card"
+              maxCount={1}
+              beforeUpload={(file) => {
+                const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/gif';
+                if (!isJpgOrPng) {
+                  message.error('You can only upload JPG/PNG/GIF files!');
+                }
+                const isLt2M = file.size / 1024 / 1024 < 2;
+                if (!isLt2M) {
+                  message.error('Image must smaller than 2MB!');
+                }
+                return false; // Prevent auto upload
+              }}
+              showUploadList={{
+                showPreviewIcon: true,
+                showRemoveIcon: true,
+              }}
+            >
+              <div>
+                <UploadOutlined />
+                <div style={{ marginTop: 8 }}>Upload Image</div>
+              </div>
+            </Upload>
           </Form.Item>
 
           <Form.Item>
