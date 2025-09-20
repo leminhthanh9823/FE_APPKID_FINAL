@@ -33,6 +33,7 @@ import DetailAssignFeedback from './pages/feedback/admin/DetailAssignFeedback';
 import FeedbackTeacher from './pages/feedback/teacher/FeedbackTeacher';
 import DetailTeacherFeedback from './pages/feedback/teacher/DetailTeacherFeedback';
 import LearningPaths from './pages/learningPath/LearningPaths';
+import EditItems from './pages/learningPath/EditItems';
 
 const NotFound = lazy(() => import('./pages/NotFound'));
 const ForgotPass = lazy(() => import('./pages/ForgotPass'));
@@ -126,6 +127,7 @@ export function App() {
                 element={<DetailTeacherFeedback />}
               />
               <Route path={ROUTES.LEARNING_PATH} element={<LearningPaths />} />
+              <Route path={ROUTES.EDIT_ITEMS_LEARNING_PATH} element={<EditItems />} />
             </Route>
           </Route>
           {/* Remove old commented code and add proper protected routes */}

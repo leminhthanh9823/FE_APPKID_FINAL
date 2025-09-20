@@ -130,3 +130,9 @@ export const DIFFICULTY_OPTIONS_UC = [
   { value: 4, label: 'Level 4' },
   { value: 5, label: 'Level 5' },
 ];
+
+export const SEARCH_AVAILABLE_READING = [
+  { value: null, label: 'All' },
+  { value: true, label: 'Available' },
+  { value: false, label: 'In Learning Path' },
+]
