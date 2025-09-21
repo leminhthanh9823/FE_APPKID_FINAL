@@ -107,7 +107,12 @@ const CreateGamePage: React.FC = () => {
         });
         
         message.success('Words assigned successfully');
-        navigate(`/reading/${readingId}/games`);
+        // Navigate back to appropriate games view
+        if (readingId) {
+          navigate(`/reading/${readingId}/games`);
+        } else {
+          navigate('/games');
+        }
       } catch (error) {
         if (error instanceof Error) {
           message.error(error.message);
@@ -152,13 +157,26 @@ const CreateGamePage: React.FC = () => {
           </div>
         ) : (
           <div className="assign-words-section">
-            <div className="d-flex justify-content-end mb-3">
+            <div className="d-flex justify-content-end mb-3 gap-2">
+              <button 
+                className="btn btn-outline-secondary"
+                onClick={() => {
+                  // Navigate back to games view without assigning words
+                  if (readingId) {
+                    navigate(`/reading/${readingId}/games`);
+                  } else {
+                    navigate('/games');
+                  }
+                }}
+              >
+                Skip Words Assignment
+              </button>
               <button 
                 className="btn btn-primary"
                 onClick={handleFinish} 
                 disabled={selectedWords.length === 0}
               >
-                Finish
+                Finish & Assign Words
               </button>
             </div>
             <WordAssignmentPanel

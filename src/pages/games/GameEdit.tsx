@@ -19,6 +19,9 @@ const GameEdit: React.FC = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   
+  // Handle case where gameId might be in different param position
+  const actualGameId = gameId || useParams().gameId;
+  
   const {
     game,
     allWords,
@@ -26,7 +29,7 @@ const GameEdit: React.FC = () => {
     loading,
     updateGame,
     updateGameWords
-  } = useGameEdit(gameId || '');
+  } = useGameEdit(actualGameId || '');
 
   // Handle form submission for game details
   const handleSubmit = async (values: any) => {
@@ -116,7 +119,9 @@ const GameEdit: React.FC = () => {
               <a href={`/kid-reading`}>Reading Management</a>
             </li>
             <li className="breadcrumb-item">
-              <a href={`/reading/${readingId}/games`}>View Game</a>
+              <a href={readingId ? `/reading/${readingId}/games` : '/games'}>
+                {readingId ? 'View Game' : 'Games'}
+              </a>
             </li>
             <li className="breadcrumb-item active">Edit Game</li>
           </ol>
@@ -227,7 +232,7 @@ const GameEdit: React.FC = () => {
           extra={
             <Button 
               type="primary"
-              onClick={() => navigate(`/word/game/${gameId}/words`)}
+              onClick={() => navigate(`/word/game/${actualGameId}/words`)}
             >
               Manage Words
             </Button>

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, Button, Input, Tabs, Space, Tag, message, Spin, Modal, Form, Select, Upload } from 'antd';
-import { SearchOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
+import { SearchOutlined, PlusOutlined, UploadOutlined, EditOutlined } from '@ant-design/icons';
 import useGameEdit from '../../hooks/useGameEdit';
 import { Word, getWordTypeName } from '../../types/word';
 import { Game } from '../../types/game';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import useCreateWord from '../../hooks/useCreateWord';
+import useEditWord from '../../hooks/useEditWord';
 import styled from 'styled-components';
 
 const WordItemStyled = styled.div.withConfig({
@@ -53,7 +54,7 @@ const WordItemStyled = styled.div.withConfig({
   }
 `;
 
-const WordItem = React.memo<{ word: Word; index: number }>(({ word, index }) => (
+const WordItem = React.memo<{ word: Word; index: number; onEdit?: (word: Word) => void }>(({ word, index, onEdit }) => (
   <Draggable key={word.id} draggableId={word.id.toString()} index={index}>
     {(provided, snapshot) => (
       <WordItemStyled
@@ -62,9 +63,26 @@ const WordItem = React.memo<{ word: Word; index: number }>(({ word, index }) => 
         {...provided.dragHandleProps}
         isDragging={snapshot.isDragging}
       >
-        <Space>
-          <span className="word-text">{word.word}</span>
-          <Tag color="blue">{getWordTypeName(word.type)}</Tag>
+        <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+          <Space>
+            <span className="word-text">{word.word}</span>
+            <Tag color="blue">{getWordTypeName(word.type)}</Tag>
+          </Space>
+          {onEdit && (
+            <Button
+              type="text"
+              size="small"
+              icon={<EditOutlined />}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(word);
+              }}
+              style={{ 
+                opacity: snapshot.isDragging ? 0 : 1,
+                color: '#1890ff'
+              }}
+            />
+          )}
         </Space>
       </WordItemStyled>
     )}
@@ -235,9 +253,14 @@ const AssignWordsPage: React.FC = () => {
   
   const [availableWords, setAvailableWords] = useState<Word[]>([]);
   const [assignedWords, setAssignedWords] = useState<Word[]>([]);
+  const [allLevelAssignments, setAllLevelAssignments] = useState<{ [level: string]: Word[] }>({});
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [editingWord, setEditingWord] = useState<Word | null>(null);
   const [form] = Form.useForm();
+  const [editForm] = Form.useForm();
   const { createWord, loading: creating } = useCreateWord();
+  const { editWord, loading: editing } = useEditWord();
 
   const {
     game,
@@ -256,39 +279,46 @@ const AssignWordsPage: React.FC = () => {
   }, [game]);
 
   useEffect(() => {
-    console.log('Debug - Data received:', {
-      allWords: allWords?.length,
-      gameWords: gameWords?.length,
-      selectedLevel,
-      game
-    });
-
     if (allWords && gameWords) {
-      const assignedWordIds = new Set(gameWords.map((word: any) => word.id));
+      const levelAssignments: { [level: string]: Word[] } = {};
       
-      const currentLevelWords = allWords.filter(w => w.level === parseInt(selectedLevel));
-      
-      const available = currentLevelWords.filter(w => !assignedWordIds.has(w.id));
-      console.log('Available words after filtering:', available.map(w => ({ id: w.id, word: w.word })));
-      
-      const assignedWordsData = gameWords
-        .sort((a: any, b: any) => {
+      gameWords.forEach((word: any) => {
+        const level = word.level.toString();
+        if (!levelAssignments[level]) {
+          levelAssignments[level] = [];
+        }
+        levelAssignments[level].push(word);
+      });
+
+      Object.keys(levelAssignments).forEach(level => {
+        levelAssignments[level] = levelAssignments[level].sort((a: any, b: any) => {
           const aOrder = a.games?.[0]?.game_words?.sequence_order || 999;
           const bOrder = b.games?.[0]?.game_words?.sequence_order || 999;
           return aOrder - bOrder;
         });
-
-      console.log('Debug - Processed data:', {
-        currentLevelWords: currentLevelWords.length,
-        available: available.length,
-        assigned: assignedWordsData.length,
-        assignedIds: Array.from(assignedWordIds)
       });
 
-      setAvailableWords(available);
-      setAssignedWords(assignedWordsData);
+      setAllLevelAssignments(levelAssignments);
     }
-  }, [allWords, gameWords, selectedLevel, game]);
+  }, [allWords, gameWords]);
+
+  useEffect(() => {
+    if (allWords) {
+      const allAssignedWordIds = new Set<number>();
+      Object.values(allLevelAssignments).forEach(levelWords => {
+        levelWords.forEach(word => allAssignedWordIds.add(word.id));
+      });
+
+      const currentLevelWords = allWords.filter(w => w.level === parseInt(selectedLevel));
+      
+      const available = currentLevelWords.filter(w => !allAssignedWordIds.has(w.id));
+      
+      const assigned = allLevelAssignments[selectedLevel] || [];
+
+      setAvailableWords(available);
+      setAssignedWords(assigned);
+    }
+  }, [allWords, selectedLevel, allLevelAssignments]);
 
   const filteredAvailableWords = React.useMemo(() => 
     availableWords.filter(word => 
@@ -302,6 +332,7 @@ const AssignWordsPage: React.FC = () => {
     const { source, destination } = result;
     
     if (source.droppableId === destination.droppableId) {
+      // Reordering within the same list
       if (source.droppableId === 'available') {
         setAvailableWords(prev => {
           const items = Array.from(prev);
@@ -309,55 +340,104 @@ const AssignWordsPage: React.FC = () => {
           items.splice(result.destination!.index, 0, reorderedItem);
           return items;
         });
-      } else {
-        setAssignedWords(prev => {
-          const items = Array.from(prev);
-          const [reorderedItem] = items.splice(result.source.index, 1);
-          items.splice(result.destination!.index, 0, reorderedItem);
-          return items;
-        });
+      } else if (source.droppableId === 'assigned') {
+        const newAssignedWords = Array.from(assignedWords);
+        const [reorderedItem] = newAssignedWords.splice(result.source.index, 1);
+        newAssignedWords.splice(result.destination!.index, 0, reorderedItem);
+        
+        setAssignedWords(newAssignedWords);
+        
+        // Update persistent state for current level
+        setAllLevelAssignments(prev => ({
+          ...prev,
+          [selectedLevel]: newAssignedWords
+        }));
       }
     } else {
-      if (source.droppableId === 'available') {
+      // Moving between lists
+      if (source.droppableId === 'available' && destination.droppableId === 'assigned') {
+        // Moving from available to assigned
         const movedItem = availableWords[source.index];
-        setAvailableWords(prev => prev.filter((_, index) => index !== source.index));
-        setAssignedWords(prev => {
-          const newItems = Array.from(prev);
-          newItems.splice(destination.index, 0, movedItem);
-          return newItems;
-        });
-      } else {
+        const newAvailableWords = availableWords.filter((_, index) => index !== source.index);
+        const newAssignedWords = Array.from(assignedWords);
+        newAssignedWords.splice(destination.index, 0, movedItem);
+        
+        setAvailableWords(newAvailableWords);
+        setAssignedWords(newAssignedWords);
+        
+        // Update persistent state for current level
+        setAllLevelAssignments(prev => ({
+          ...prev,
+          [selectedLevel]: newAssignedWords
+        }));
+      } else if (source.droppableId === 'assigned' && destination.droppableId === 'available') {
+        // Moving from assigned to available
         const movedItem = assignedWords[source.index];
-        setAssignedWords(prev => prev.filter((_, index) => index !== source.index));
-        setAvailableWords(prev => {
-          const newItems = Array.from(prev);
-          newItems.splice(destination.index, 0, movedItem);
-          return newItems;
-        });
+        const newAssignedWords = assignedWords.filter((_, index) => index !== source.index);
+        const newAvailableWords = Array.from(availableWords);
+        newAvailableWords.splice(destination.index, 0, movedItem);
+        
+        setAssignedWords(newAssignedWords);
+        setAvailableWords(newAvailableWords);
+        
+        // Update persistent state for current level
+        setAllLevelAssignments(prev => ({
+          ...prev,
+          [selectedLevel]: newAssignedWords
+        }));
       }
     }
-  }, [availableWords, assignedWords]);
+  }, [availableWords, assignedWords, selectedLevel]);
+
+  const handleEditWord = (word: Word) => {
+    setEditingWord(word);
+    editForm.setFieldsValue({
+      word: word.word,
+      type: word.type,
+      level: word.level,
+      note: word.note || '',
+      image: word.image ? [{
+        uid: '-1',
+        name: 'word-image',
+        status: 'done',
+        url: word.image.startsWith('http') ? word.image : `https://s3.engkid.io.vn${word.image}`
+      }] : []
+    });
+    setIsEditModalVisible(true);
+  };
 
   const handleSave = async () => {
     try {
-      const otherLevelsWords = gameWords
-        .filter(word => word.level !== parseInt(selectedLevel))
-        .map((word, index) => ({
-          wordId: word.id,
-          level: word.level,
-          isActive: true,
-          order: word.games?.[0]?.game_words?.sequence_order || index + 1
-        }));
+      // Build word assignments from all levels
+      const allAssignments: Array<{
+        wordId: number;
+        level: number;
+        isActive: boolean;
+        order: number;
+      }> = [];
 
-      const currentLevelAssignedWords = assignedWords.filter(word => word.level === parseInt(selectedLevel));
-      const currentLevelAssignments = currentLevelAssignedWords.map((word, index) => ({
-        wordId: word.id,
-        level: parseInt(selectedLevel),
-        isActive: true,
-        order: index + 1
-      }));
+      // Process all level assignments
+      Object.keys(allLevelAssignments).forEach(level => {
+        const levelWords = allLevelAssignments[level];
+        levelWords.forEach((word, index) => {
+          allAssignments.push({
+            wordId: word.id,
+            level: parseInt(level),
+            isActive: true,
+            order: index + 1
+          });
+        });
+      });
 
-      await updateGameWords([...otherLevelsWords, ...currentLevelAssignments]);
+      console.log('Saving word assignments:', {
+        totalAssignments: allAssignments.length,
+        byLevel: Object.keys(allLevelAssignments).reduce((acc, level) => {
+          acc[level] = allLevelAssignments[level].length;
+          return acc;
+        }, {} as any)
+      });
+
+      await updateGameWords(allAssignments);
       message.success('Words assigned successfully');
       if (currentReadingId) {
         navigate(`/reading/${currentReadingId}/games/${gameId}/edit`);
@@ -366,6 +446,7 @@ const AssignWordsPage: React.FC = () => {
       }
     } catch (error) {
       message.error('Failed to assign words');
+      console.error('Save error:', error);
     }
   };
 
@@ -444,11 +525,26 @@ const AssignWordsPage: React.FC = () => {
           activeKey={selectedLevel}
           onChange={key => setSelectedLevel(key)}
           items={[
-            { key: '1', label: 'Level 1' },
-            { key: '2', label: 'Level 2' },
-            { key: '3', label: 'Level 3' },
-            { key: '4', label: 'Level 4' },
-            { key: '5', label: 'Level 5' },
+            { 
+              key: '1', 
+              label: `Level 1 ${allLevelAssignments['1'] ? `(${allLevelAssignments['1'].length})` : '(0)'}` 
+            },
+            { 
+              key: '2', 
+              label: `Level 2 ${allLevelAssignments['2'] ? `(${allLevelAssignments['2'].length})` : '(0)'}` 
+            },
+            { 
+              key: '3', 
+              label: `Level 3 ${allLevelAssignments['3'] ? `(${allLevelAssignments['3'].length})` : '(0)'}` 
+            },
+            { 
+              key: '4', 
+              label: `Level 4 ${allLevelAssignments['4'] ? `(${allLevelAssignments['4'].length})` : '(0)'}` 
+            },
+            { 
+              key: '5', 
+              label: `Level 5 ${allLevelAssignments['5'] ? `(${allLevelAssignments['5'].length})` : '(0)'}` 
+            },
           ]}
         />
 
@@ -487,7 +583,7 @@ const AssignWordsPage: React.FC = () => {
                       </div>
                     ) : (
                       filteredAvailableWords.map((word, index) => (
-                        <WordItem key={word.id} word={word} index={index} />
+                        <WordItem key={word.id} word={word} index={index} onEdit={handleEditWord} />
                       ))
                     )}
                     {provided.placeholder}
@@ -524,7 +620,7 @@ const AssignWordsPage: React.FC = () => {
                       </div>
                     ) : (
                       assignedWords.map((word, index) => (
-                        <WordItem key={word.id} word={word} index={index} />
+                        <WordItem key={word.id} word={word} index={index} onEdit={handleEditWord} />
                       ))
                     )}
                     {provided.placeholder}
@@ -596,8 +692,16 @@ const AssignWordsPage: React.FC = () => {
               form.resetFields();
               
               // Add new word to available words list only if it matches current level
+              // and it's not already assigned to any level
               if (newWord.level === parseInt(selectedLevel)) {
-                setAvailableWords(prev => [...prev, newWord]);
+                const allAssignedWordIds = new Set<number>();
+                Object.values(allLevelAssignments).forEach(levelWords => {
+                  levelWords.forEach(word => allAssignedWordIds.add(word.id));
+                });
+                
+                if (!allAssignedWordIds.has(newWord.id)) {
+                  setAvailableWords(prev => [...prev, newWord]);
+                }
               }
             } catch (error) {
               message.error('Failed to create word');
@@ -657,6 +761,147 @@ const AssignWordsPage: React.FC = () => {
               maxCount={1}
             >
               <Button icon={<UploadOutlined />}>Upload Image</Button>
+            </Upload>
+          </Form.Item>
+
+          <Form.Item
+            name="note"
+            label="Note"
+          >
+            <Input.TextArea rows={3} maxLength={1000} showCount />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="Edit Word"
+        open={isEditModalVisible}
+        onOk={editForm.submit}
+        onCancel={() => {
+          setIsEditModalVisible(false);
+          setEditingWord(null);
+          editForm.resetFields();
+        }}
+        confirmLoading={editing}
+        width={600}
+      >
+        <Form
+          form={editForm}
+          layout="vertical"
+          onFinish={async (values) => {
+            if (!editingWord) return;
+            
+            try {
+              const formData = new FormData();
+              
+              // Append word data fields
+              formData.append('word', values.word);
+              formData.append('type', values.type.toString());
+              formData.append('level', values.level.toString());
+              formData.append('note', values.note || '');
+              formData.append('is_active', '1');
+              
+              // Append file if exists and is a new upload
+              if (values.image && values.image[0] && values.image[0].originFileObj) {
+                formData.append('image', values.image[0].originFileObj);
+              }
+
+              const updatedWord = await editWord(editingWord.id, formData);
+              message.success('Word updated successfully');
+              
+              // Update the word in local state
+              const updateWordInState = (words: Word[]) => {
+                return words.map(word => 
+                  word.id === editingWord.id ? { ...updatedWord } : word
+                );
+              };
+              
+              // Update available words if the word is in current available list
+              setAvailableWords(prev => updateWordInState(prev));
+              
+              // Update assigned words if the word is in current assigned list
+              setAssignedWords(prev => updateWordInState(prev));
+              
+              // Update persistent assignments
+              setAllLevelAssignments(prev => {
+                const updated = { ...prev };
+                Object.keys(updated).forEach(level => {
+                  updated[level] = updateWordInState(updated[level]);
+                });
+                return updated;
+              });
+              
+              setIsEditModalVisible(false);
+              setEditingWord(null);
+              editForm.resetFields();
+            } catch (error) {
+              message.error('Failed to update word');
+            }
+          }}
+        >
+          <Form.Item
+            name="word"
+            label="Word"
+            rules={[{ required: true, message: 'Please input the word' }]}
+          >
+            <Input maxLength={100} showCount />
+          </Form.Item>
+
+          <Form.Item
+            name="type"
+            label="Word Type"
+            rules={[{ required: true, message: 'Please select word type' }]}
+          >
+            <Select>
+              <Select.Option value={1}>Noun</Select.Option>
+              <Select.Option value={2}>Verb</Select.Option>
+              <Select.Option value={3}>Adjective</Select.Option>
+              <Select.Option value={4}>Adverb</Select.Option>
+              <Select.Option value={5}>Preposition</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="level"
+            label="Level"
+            rules={[{ required: true, message: 'Please select level' }]}
+          >
+            <Select>
+              <Select.Option value={1}>Level 1</Select.Option>
+              <Select.Option value={2}>Level 2</Select.Option>
+              <Select.Option value={3}>Level 3</Select.Option>
+              <Select.Option value={4}>Level 4</Select.Option>
+              <Select.Option value={5}>Level 5</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="image"
+            label="Image"
+            valuePropName="fileList"
+            getValueFromEvent={(e) => {
+              if (Array.isArray(e)) {
+                return e;
+              }
+              return e?.fileList;
+            }}
+          >
+            <Upload
+              accept="image/*"
+              beforeUpload={() => false}
+              maxCount={1}
+              listType="picture-card"
+              showUploadList={{
+                showPreviewIcon: true,
+                showRemoveIcon: true,
+              }}
+            >
+              {(!editForm.getFieldValue('image') || editForm.getFieldValue('image').length === 0) && (
+                <div>
+                  <UploadOutlined />
+                  <div style={{ marginTop: 8 }}>Upload Image</div>
+                </div>
+              )}
             </Upload>
           </Form.Item>
 

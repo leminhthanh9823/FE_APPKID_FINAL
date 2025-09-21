@@ -16,18 +16,32 @@ export const useGameManagement = () => {
   });
 
   const fetchGames = async (page: number = 1) => {
-    if (!readingId) {
-      throw new Error('Reading ID is required to fetch games');
-    }
     try {
       setLoading(true);
-      const response = await apiClient.get(`/game/teacher/readings/${readingId}/games`, {
+      let endpoint = '/game/teacher/games';
+      
+      // If we have a readingId, fetch games for that specific reading
+      if (readingId) {
+        endpoint = `/game/teacher/readings/${readingId}/games`;
+      }
+      
+      const response = await apiClient.get(endpoint, {
         params: {
           page,
           limit: pagination.limit
         }
       });
-      const { games, pagination: newPagination } = response.data.data;
+      
+      // Handle the response structure based on your API response
+      const data = response.data.data;
+      const games = data.games || data;
+      const newPagination = data.pagination || {
+        total: games.length,
+        totalPages: Math.ceil(games.length / pagination.limit),
+        currentPage: page,
+        limit: pagination.limit
+      };
+      
       dispatch({ type: 'SET_GAMES', payload: games });
       setPagination(newPagination);
     } catch (error) {
@@ -42,9 +56,7 @@ export const useGameManagement = () => {
   };
 
   useEffect(() => {
-    if (readingId) {
-      fetchGames();
-    }
+    fetchGames();
   }, [readingId]);
 
   const createGame = async (gameData: any) => {

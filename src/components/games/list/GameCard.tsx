@@ -1,5 +1,5 @@
-import { Card, Tag, Button, Dropdown, MenuProps } from 'antd';
-import { EllipsisOutlined, PictureOutlined } from '@ant-design/icons';
+import { Card, Tag, Button, Dropdown, MenuProps, Statistic, Space, Divider } from 'antd';
+import { EllipsisOutlined, PictureOutlined, UserOutlined, BookOutlined, ReadOutlined } from '@ant-design/icons';
 import { Game, GameType, GameStatus } from '../../../types/game';
 import styled from 'styled-components';
 
@@ -67,6 +67,46 @@ const StyledCard = styled(Card)<{ $isDragging?: boolean }>`
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  
+  .game-stats {
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+    
+    .ant-statistic {
+      text-align: center;
+      
+      .ant-statistic-content {
+        font-size: 16px;
+        font-weight: 600;
+      }
+      
+      .ant-statistic-title {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 4px;
+      }
+    }
+  }
+  
+  .prerequisite-info {
+    background: #e6f4ff;
+    border: 1px solid #91caff;
+    border-radius: 6px;
+    padding: 8px;
+    margin-bottom: 12px;
+    
+    .prerequisite-title {
+      font-size: 12px;
+      color: #0958d9;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
   }
 `;
 
@@ -137,7 +177,35 @@ const GameCard: React.FC<GameCardProps> = ({
         <PictureOutlined />
         <span>No Image</span>
       </div>
-      <p className="game-description">{game.description}</p>
+      
+      {game.description && (
+        <p className="game-description">{game.description}</p>
+      )}
+      
+      {game.prerequisiteReading && (
+        <div className="prerequisite-info">
+          <p className="prerequisite-title">
+            <ReadOutlined />
+            Reading: {game.prerequisiteReading.title}
+          </p>
+        </div>
+      )}
+      
+      <div className="game-stats">
+        <Space split={<Divider type="vertical" />} style={{ width: '100%', justifyContent: 'center' }}>
+          <Statistic
+            title="Students"
+            value={game.studentCompletionCount || 0}
+            prefix={<UserOutlined />}
+          />
+          <Statistic
+            title="Words"
+            value={game.wordCount || 0}
+            prefix={<BookOutlined />}
+          />
+        </Space>
+      </div>
+      
       <div className="game-meta">
         <Tag>{getGameTypeName(game.type).replace(/_/g, ' ')}</Tag>
         <Tag color={getStatusColor(game.is_active)}>{getStatusText(game.is_active)}</Tag>

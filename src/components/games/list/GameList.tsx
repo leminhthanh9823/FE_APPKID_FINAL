@@ -40,7 +40,7 @@ const GameList: React.FC<GameListProps> = ({
 
   const filteredGames = games.filter((game) => {
     // Filter by reading ID if specified
-    if (filters.readingId && game.prerequisite_reading_id !== parseInt(filters.readingId)) {
+    if (filters.readingId && game.prerequisite_reading_id && game.prerequisite_reading_id !== parseInt(filters.readingId)) {
       return false;
     }
 
