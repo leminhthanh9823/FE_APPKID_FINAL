@@ -141,6 +141,7 @@ export function App() {
               <Route path={ROUTES.GAMES_BY_READING} element={<GamesPage />} />
               <Route path={ROUTES.CREATE_GAME} element={<CreateGamePage />} />
               <Route path={ROUTES.EDIT_GAME} element={<GameEdit />} />
+              <Route path={ROUTES.EDIT_GAME_GENERAL} element={<GameEdit />} />
 
               {/* Word Management Routes */}
               <Route path={ROUTES.ASSIGN_WORDS} element={<AssignWordsPage />} />

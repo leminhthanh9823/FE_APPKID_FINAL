@@ -16,18 +16,32 @@ export const useGameManagement = () => {
   });
 
   const fetchGames = async (page: number = 1) => {
-    if (!readingId) {
-      throw new Error('Reading ID is required to fetch games');
-    }
     try {
       setLoading(true);
-      const response = await apiClient.get(`/game/teacher/readings/${readingId}/games`, {
+      let endpoint = '/game/teacher/games';
+      
+      // If we have a readingId, fetch games for that specific reading
+      if (readingId) {
+        endpoint = `/game/teacher/readings/${readingId}/games`;
+      }
+      
+      const response = await apiClient.get(endpoint, {
         params: {
           page,
           limit: pagination.limit
         }
       });
-      const { games, pagination: newPagination } = response.data.data;
+      
+      // Handle the response structure based on your API response
+      const data = response.data.data;
+      const games = data.games || data;
+      const newPagination = data.pagination || {
+        total: games.length,
+        totalPages: Math.ceil(games.length / pagination.limit),
+        currentPage: page,
+        limit: pagination.limit
+      };
+      
       dispatch({ type: 'SET_GAMES', payload: games });
       setPagination(newPagination);
     } catch (error) {
@@ -42,25 +56,48 @@ export const useGameManagement = () => {
   };
 
   useEffect(() => {
-    if (readingId) {
-      fetchGames();
-    }
+    fetchGames();
   }, [readingId]);
 
-  const createGame = async (gameData: CreateGameDto) => {
+  const createGame = async (gameData: any) => {
     if (!readingId) {
       throw new Error('Reading ID is required to create a game');
     }
     try {
       setLoading(true);
-      const response = await apiClient.post(`/game/teacher/readings/${readingId}/games`, {
-        ...gameData,
-        name: gameData.name.trim(),
+      
+      // Create FormData for handling file uploads
+      const formData = new FormData();
+      
+      // Add all form values to FormData
+      Object.keys(gameData).forEach(key => {
+        if (key === 'image' && gameData[key]) {
+          // Handle image upload - get the file from fileList
+          const fileList = gameData[key];
+          if (fileList && fileList.length > 0) {
+            const file = fileList[0].originFileObj || fileList[0];
+            if (file instanceof File) {
+              formData.append('image', file);
+            }
+          }
+        } else if (key === 'name') {
+          formData.append(key, gameData[key].trim());
+        } else if (gameData[key] !== undefined && gameData[key] !== null) {
+          formData.append(key, gameData[key]);
+        }
       });
+
+      const response = await apiClient.post(`/game/teacher/readings/${readingId}/games`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
       const newGame = response.data.data;
       dispatch({ type: 'SET_GAMES', payload: [...state.games, newGame] });
       return newGame;
     } catch (error) {
+      console.error('Failed to create game:', error);
       dispatch({
         type: 'SET_ERROR',
         payload: 'Failed to create game',
@@ -71,17 +108,42 @@ export const useGameManagement = () => {
     }
   };
 
-  const updateGame = async (gameId: number, updates: UpdateGameDto) => {
+  const updateGame = async (gameId: number, updates: any) => {
     try {
       setLoading(true);
-      if (updates.name) {
-        updates.name = updates.name.trim();
-      }
-      const response = await apiClient.put(`/game/teacher/games/${gameId}`, updates);
+      
+      // Create FormData for handling file uploads
+      const formData = new FormData();
+      
+      // Add all form values to FormData
+      Object.keys(updates).forEach(key => {
+        if (key === 'image' && updates[key]) {
+          // Handle image upload - get the file from fileList
+          const fileList = updates[key];
+          if (fileList && fileList.length > 0) {
+            const file = fileList[0].originFileObj || fileList[0];
+            if (file instanceof File) {
+              formData.append('image', file);
+            }
+          }
+        } else if (key === 'name') {
+          formData.append(key, updates[key].trim());
+        } else if (updates[key] !== undefined && updates[key] !== null) {
+          formData.append(key, updates[key]);
+        }
+      });
+
+      const response = await apiClient.put(`/game/teacher/games/${gameId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
       const updatedGame = response.data.data;
       dispatch({ type: 'UPDATE_GAME', payload: updatedGame });
       return updatedGame;
     } catch (error) {
+      console.error('Failed to update game:', error);
       dispatch({
         type: 'SET_ERROR',
         payload: 'Failed to update game',
@@ -126,6 +188,34 @@ export const useGameManagement = () => {
     }
   };
 
+  const reorderGames = async (reorderedGames: Game[]) => {
+    try {
+      setLoading(true);
+      
+      // Prepare bulk update data
+      const updates = reorderedGames.map(game => ({
+        id: game.id,
+        sequence_order: game.sequence_order
+      }));
+
+      // Call API to update sequence orders
+      await apiClient.put('/game/teacher/games/reorder', { games: updates });
+      
+      // Update local state
+      dispatch({ type: 'SET_GAMES', payload: reorderedGames });
+      
+    } catch (error) {
+      console.error('Failed to reorder games:', error);
+      dispatch({
+        type: 'SET_ERROR',
+        payload: 'Failed to reorder games',
+      });
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handlePageChange = (page: number) => {
     fetchGames(page);
   };
@@ -141,6 +231,7 @@ export const useGameManagement = () => {
     updateGame,
     deleteGame,
     changeGameStatus,
+    reorderGames,
   };
 };
 

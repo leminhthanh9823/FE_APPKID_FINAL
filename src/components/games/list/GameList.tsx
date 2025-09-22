@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Row, Col, Button, Pagination } from 'antd';
+import { Row, Col, Button, Pagination, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Game, GameType, GameStatus, GameFilters as IGameFilters, PaginationInfo } from '../../../types/game';
 import GameFilters from './GameFilters';
 import GameCard from './GameCard';
@@ -14,6 +15,7 @@ interface GameListProps {
   onEditGame: (game: Game) => void;
   onDeleteGame: (gameId: number) => void;
   onStatusChange?: (gameId: number, status: GameStatus) => void;
+  onReorderGames?: (games: Game[]) => void;
 }
 
 const GameList: React.FC<GameListProps> = ({
@@ -25,6 +27,7 @@ const GameList: React.FC<GameListProps> = ({
   onEditGame,
   onDeleteGame,
   onStatusChange,
+  onReorderGames,
 }) => {
   const [filters, setFilters] = useState<IGameFilters>({
     search: '',
@@ -37,7 +40,7 @@ const GameList: React.FC<GameListProps> = ({
 
   const filteredGames = games.filter((game) => {
     // Filter by reading ID if specified
-    if (filters.readingId && game.prerequisite_reading_id !== parseInt(filters.readingId)) {
+    if (filters.readingId && game.prerequisite_reading_id && game.prerequisite_reading_id !== parseInt(filters.readingId)) {
       return false;
     }
 
@@ -69,6 +72,30 @@ const GameList: React.FC<GameListProps> = ({
     return true;
   });
 
+  // Sort by sequence_order
+  const sortedGames = [...filteredGames].sort((a, b) => {
+    return (a.sequence_order || 0) - (b.sequence_order || 0);
+  });
+
+  // Handle drag end
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+    if (!onReorderGames) return;
+
+    const items = Array.from(sortedGames);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    // Update sequence_order for all games
+    const updatedGames = items.map((game, index) => ({
+      ...game,
+      sequence_order: index + 1
+    }));
+
+    onReorderGames(updatedGames);
+    message.success('Game order updated successfully');
+  };
+
   return (
     <div className="game-list">
       <div className="game-list-header mb-4 flex justify-between items-center">
@@ -82,17 +109,51 @@ const GameList: React.FC<GameListProps> = ({
         </Button>
       </div>
 
-      <Row gutter={[16, 16]}>
-        {filteredGames.map((game) => (
-          <Col key={game.id} xs={24} sm={12} lg={8} xl={6}>
-            <GameCard
-              game={game}
-              onEdit={onEditGame}
-              onDelete={onDeleteGame}
-            />
-          </Col>
-        ))}
-      </Row>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="games-list">
+          {(provided) => (
+            <div
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+            >
+              <Row gutter={[16, 16]}>
+                {sortedGames.map((game, index) => (
+                  <Draggable 
+                    key={game.id} 
+                    draggableId={game.id.toString()} 
+                    index={index}
+                    isDragDisabled={!onReorderGames}
+                  >
+                    {(provided, snapshot) => (
+                      <Col 
+                        xs={24} sm={12} lg={8} xl={6}
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        style={{
+                          ...provided.draggableProps.style,
+                          opacity: snapshot.isDragging ? 0.8 : 1,
+                          transform: snapshot.isDragging 
+                            ? `${provided.draggableProps.style?.transform} rotate(5deg)`
+                            : provided.draggableProps.style?.transform
+                        }}
+                      >
+                        <GameCard
+                          game={game}
+                          onEdit={onEditGame}
+                          onDelete={onDeleteGame}
+                          isDragging={snapshot.isDragging}
+                        />
+                      </Col>
+                    )}
+                  </Draggable>
+                ))}
+              </Row>
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
 
       {pagination && (
         <div className="mt-4 flex justify-center">

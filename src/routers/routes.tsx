@@ -61,6 +61,7 @@ export const ROUTES = {
   GAMES_BY_READING: '/reading/:id/games',
   CREATE_GAME: '/reading/:id/games/create',
   EDIT_GAME: '/reading/:id/games/:gameId/edit',
+  EDIT_GAME_GENERAL: '/games/:gameId/edit',
 
   // Word Management Routes
   WORDS: '/word',

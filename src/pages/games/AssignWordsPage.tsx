@@ -1,40 +1,60 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, Button, Input, Tabs, Space, Tag, message, Spin, Modal, Form, Select, Upload } from 'antd';
-import { SearchOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
+import { SearchOutlined, PlusOutlined, UploadOutlined, EditOutlined } from '@ant-design/icons';
 import useGameEdit from '../../hooks/useGameEdit';
 import { Word, getWordTypeName } from '../../types/word';
 import { Game } from '../../types/game';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import useCreateWord from '../../hooks/useCreateWord';
+import useEditWord from '../../hooks/useEditWord';
 import styled from 'styled-components';
 
 const WordItemStyled = styled.div.withConfig({
   shouldForwardProp: (prop) => prop !== 'isDragging',
 })<{ isDragging?: boolean }>`
-  padding: 12px;
-  margin-bottom: 8px;
-  background: ${props => props.isDragging ? '#2c2c2c' : '#252525'};
-  border: 1px solid #404040;
-  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 12px;
+  background: ${props => props.isDragging ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'white'};
+  border: 2px solid ${props => props.isDragging ? '#667eea' : '#e8f4fd'};
+  border-radius: 10px;
   cursor: grab;
-  color: #fff;
+  color: ${props => props.isDragging ? 'white' : '#333'};
+  box-shadow: ${props => props.isDragging ? '0 8px 25px rgba(102, 126, 234, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.1)'};
+  transition: all 0.2s ease;
+  transform: ${props => props.isDragging ? 'rotate(2deg) scale(1.02)' : 'rotate(0deg) scale(1)'};
   
   &:hover {
-    background: #2c2c2c;
+    background: ${props => props.isDragging ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'linear-gradient(135deg, #f8f9ff 0%, #e8f4fd 100%)'};
+    border-color: #667eea;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
+    transform: translateY(-2px);
   }
 
   .ant-tag {
-    margin-left: 8px;
+    margin-left: 12px;
+    border-radius: 20px;
+    font-weight: 500;
+    
+    &.ant-tag-blue {
+      background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+      border-color: transparent;
+      color: white;
+    }
   }
 
   .ant-space {
     width: 100%;
     justify-content: space-between;
   }
+  
+  .word-text {
+    font-weight: 600;
+    font-size: 15px;
+  }
 `;
 
-const WordItem = React.memo<{ word: Word; index: number }>(({ word, index }) => (
+const WordItem = React.memo<{ word: Word; index: number; onEdit?: (word: Word) => void }>(({ word, index, onEdit }) => (
   <Draggable key={word.id} draggableId={word.id.toString()} index={index}>
     {(provided, snapshot) => (
       <WordItemStyled
@@ -43,9 +63,26 @@ const WordItem = React.memo<{ word: Word; index: number }>(({ word, index }) => 
         {...provided.dragHandleProps}
         isDragging={snapshot.isDragging}
       >
-        <Space>
-          <span>{word.word}</span>
-          <Tag color="blue">{getWordTypeName(word.type)}</Tag>
+        <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+          <Space>
+            <span className="word-text">{word.word}</span>
+            <Tag color="blue">{getWordTypeName(word.type)}</Tag>
+          </Space>
+          {onEdit && (
+            <Button
+              type="text"
+              size="small"
+              icon={<EditOutlined />}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(word);
+              }}
+              style={{ 
+                opacity: snapshot.isDragging ? 0 : 1,
+                color: '#1890ff'
+              }}
+            />
+          )}
         </Space>
       </WordItemStyled>
     )}
@@ -53,13 +90,149 @@ const WordItem = React.memo<{ word: Word; index: number }>(({ word, index }) => 
 ));
 
 const WordContainer = styled.div`
-  min-height: 400px;
-  padding: 16px;
-  background: #1e1e1e;
-  border: 1px solid #333;
-  border-radius: 4px;
-  margin-top: 16px;
-  color: #fff;
+  min-height: 500px;
+  padding: 24px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border: 2px solid #e1e8ed;
+  border-radius: 12px;
+  margin-top: 20px;
+  color: #333;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    border-color: #1890ff;
+  }
+`;
+
+const StyledCard = styled(Card)`
+  .ant-card-head {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px 12px 0 0;
+    
+    .ant-card-head-title {
+      color: white;
+      font-size: 20px;
+      font-weight: 600;
+    }
+    
+    .ant-card-extra {
+      .ant-btn {
+        border-radius: 8px;
+        font-weight: 500;
+        
+        &.ant-btn-primary {
+          background: #52c41a;
+          border-color: #52c41a;
+          
+          &:hover {
+            background: #73d13d;
+            border-color: #73d13d;
+          }
+        }
+        
+        &:not(.ant-btn-primary) {
+          background: white;
+          color: #667eea;
+          border-color: white;
+          
+          &:hover {
+            background: #f0f0f0;
+            border-color: #f0f0f0;
+          }
+        }
+      }
+    }
+  }
+  
+  .ant-card-body {
+    padding: 32px;
+    background: white;
+    border-radius: 0 0 12px 12px;
+  }
+  
+  .ant-tabs-tab {
+    font-size: 16px;
+    font-weight: 500;
+    padding: 12px 20px;
+    
+    &.ant-tabs-tab-active {
+      .ant-tabs-tab-btn {
+        color: #1890ff;
+        font-weight: 600;
+      }
+    }
+  }
+  
+  .ant-input-affix-wrapper {
+    border-radius: 10px;
+    border: 2px solid #e1e8ed;
+    padding: 12px 16px;
+    
+    &:hover, &:focus {
+      border-color: #1890ff;
+      box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1);
+    }
+  }
+`;
+
+const WordSectionHeader = styled.h3`
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  color: white;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+`;
+
+const DragDropContainer = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 24px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+`;
+
+const ActionButtonsContainer = styled.div`
+  margin-top: 32px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  text-align: right;
+  
+  .ant-btn {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 8px 24px;
+    height: auto;
+    
+    &:not(.ant-btn-primary) {
+      border-color: #d9d9d9;
+      
+      &:hover {
+        border-color: #40a9ff;
+        color: #40a9ff;
+      }
+    }
+    
+    &.ant-btn-primary {
+      background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+      border: none;
+      
+      &:hover {
+        background: linear-gradient(135deg, #73d13d 0%, #52c41a 100%);
+      }
+    }
+  }
 `;
 
 const AssignWordsPage: React.FC = () => {
@@ -70,7 +243,6 @@ const AssignWordsPage: React.FC = () => {
   const [selectedLevel, setSelectedLevel] = useState('1');
   const [currentReadingId, setCurrentReadingId] = useState<string>('');
 
-  // Debounce search text
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchText(searchText);
@@ -81,9 +253,14 @@ const AssignWordsPage: React.FC = () => {
   
   const [availableWords, setAvailableWords] = useState<Word[]>([]);
   const [assignedWords, setAssignedWords] = useState<Word[]>([]);
+  const [allLevelAssignments, setAllLevelAssignments] = useState<{ [level: string]: Word[] }>({});
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [editingWord, setEditingWord] = useState<Word | null>(null);
   const [form] = Form.useForm();
+  const [editForm] = Form.useForm();
   const { createWord, loading: creating } = useCreateWord();
+  const { editWord, loading: editing } = useEditWord();
 
   const {
     game,
@@ -93,7 +270,6 @@ const AssignWordsPage: React.FC = () => {
     updateGameWords
   } = useGameEdit(gameId || '');
 
-  // Set currentReadingId when game data is loaded
   useEffect(() => {
     if (game && game.prerequisite_reading_id) {
       const readingId = game.prerequisite_reading_id.toString();
@@ -102,62 +278,54 @@ const AssignWordsPage: React.FC = () => {
     }
   }, [game]);
 
-  // Initialize lists
   useEffect(() => {
-    console.log('Debug - Data received:', {
-      allWords: allWords?.length,
-      gameWords: gameWords?.length,
-      selectedLevel,
-      game
-    });
-
     if (allWords && gameWords) {
-      console.log('Raw gameWords (assigned words from API):', gameWords);
-      console.log('Raw allWords:', allWords);
+      const levelAssignments: { [level: string]: Word[] } = {};
       
-      // gameWords is actually words that are already assigned to this game
-      // We need to extract the assigned word IDs from gameWords
-      const assignedWordIds = new Set(gameWords.map((word: any) => word.id));
-      console.log('Assigned word IDs from API:', Array.from(assignedWordIds));
-      
-      // Filter words by level
-      const currentLevelWords = allWords.filter(w => w.level <= parseInt(selectedLevel));
-      console.log('Current level words:', currentLevelWords.map(w => ({ id: w.id, word: w.word, level: w.level })));
-      
-      // Available words = all current level words that are NOT assigned
-      const available = currentLevelWords.filter(w => !assignedWordIds.has(w.id));
-      console.log('Available words after filtering:', available.map(w => ({ id: w.id, word: w.word })));
-      
-      // Assigned words = gameWords filtered by current level and sorted by sequence_order
-      const assignedWordsData = gameWords
-        .filter((word: any) => word.level <= parseInt(selectedLevel))
-        .sort((a: any, b: any) => {
-          // Sort by sequence_order from game_words relation
+      gameWords.forEach((word: any) => {
+        const level = word.level.toString();
+        if (!levelAssignments[level]) {
+          levelAssignments[level] = [];
+        }
+        levelAssignments[level].push(word);
+      });
+
+      Object.keys(levelAssignments).forEach(level => {
+        levelAssignments[level] = levelAssignments[level].sort((a: any, b: any) => {
           const aOrder = a.games?.[0]?.game_words?.sequence_order || 999;
           const bOrder = b.games?.[0]?.game_words?.sequence_order || 999;
           return aOrder - bOrder;
         });
-
-      console.log('Debug - Processed data:', {
-        currentLevelWords: currentLevelWords.length,
-        available: available.length,
-        assigned: assignedWordsData.length,
-        assignedIds: Array.from(assignedWordIds)
       });
 
-      setAvailableWords(available);
-      setAssignedWords(assignedWordsData);
+      setAllLevelAssignments(levelAssignments);
     }
-  }, [allWords, gameWords, selectedLevel, game]);
+  }, [allWords, gameWords]);
 
-  // Filter available words based on search text
+  useEffect(() => {
+    if (allWords) {
+      const allAssignedWordIds = new Set<number>();
+      Object.values(allLevelAssignments).forEach(levelWords => {
+        levelWords.forEach(word => allAssignedWordIds.add(word.id));
+      });
+
+      const currentLevelWords = allWords.filter(w => w.level === parseInt(selectedLevel));
+      
+      const available = currentLevelWords.filter(w => !allAssignedWordIds.has(w.id));
+      
+      const assigned = allLevelAssignments[selectedLevel] || [];
+
+      setAvailableWords(available);
+      setAssignedWords(assigned);
+    }
+  }, [allWords, selectedLevel, allLevelAssignments]);
+
   const filteredAvailableWords = React.useMemo(() => 
     availableWords.filter(word => 
       word.word.toLowerCase().includes(debouncedSearchText.toLowerCase())
     ), [availableWords, debouncedSearchText]
   );
 
-  // Handle drag end
   const handleDragEnd = React.useCallback((result: DropResult) => {
     if (!result.destination) return;
 
@@ -172,59 +340,104 @@ const AssignWordsPage: React.FC = () => {
           items.splice(result.destination!.index, 0, reorderedItem);
           return items;
         });
-      } else {
-        setAssignedWords(prev => {
-          const items = Array.from(prev);
-          const [reorderedItem] = items.splice(result.source.index, 1);
-          items.splice(result.destination!.index, 0, reorderedItem);
-          return items;
-        });
+      } else if (source.droppableId === 'assigned') {
+        const newAssignedWords = Array.from(assignedWords);
+        const [reorderedItem] = newAssignedWords.splice(result.source.index, 1);
+        newAssignedWords.splice(result.destination!.index, 0, reorderedItem);
+        
+        setAssignedWords(newAssignedWords);
+        
+        // Update persistent state for current level
+        setAllLevelAssignments(prev => ({
+          ...prev,
+          [selectedLevel]: newAssignedWords
+        }));
       }
     } else {
       // Moving between lists
-      if (source.droppableId === 'available') {
+      if (source.droppableId === 'available' && destination.droppableId === 'assigned') {
+        // Moving from available to assigned
         const movedItem = availableWords[source.index];
-        setAvailableWords(prev => prev.filter((_, index) => index !== source.index));
-        setAssignedWords(prev => {
-          const newItems = Array.from(prev);
-          newItems.splice(destination.index, 0, movedItem);
-          return newItems;
-        });
-      } else {
+        const newAvailableWords = availableWords.filter((_, index) => index !== source.index);
+        const newAssignedWords = Array.from(assignedWords);
+        newAssignedWords.splice(destination.index, 0, movedItem);
+        
+        setAvailableWords(newAvailableWords);
+        setAssignedWords(newAssignedWords);
+        
+        // Update persistent state for current level
+        setAllLevelAssignments(prev => ({
+          ...prev,
+          [selectedLevel]: newAssignedWords
+        }));
+      } else if (source.droppableId === 'assigned' && destination.droppableId === 'available') {
+        // Moving from assigned to available
         const movedItem = assignedWords[source.index];
-        setAssignedWords(prev => prev.filter((_, index) => index !== source.index));
-        setAvailableWords(prev => {
-          const newItems = Array.from(prev);
-          newItems.splice(destination.index, 0, movedItem);
-          return newItems;
-        });
+        const newAssignedWords = assignedWords.filter((_, index) => index !== source.index);
+        const newAvailableWords = Array.from(availableWords);
+        newAvailableWords.splice(destination.index, 0, movedItem);
+        
+        setAssignedWords(newAssignedWords);
+        setAvailableWords(newAvailableWords);
+        
+        // Update persistent state for current level
+        setAllLevelAssignments(prev => ({
+          ...prev,
+          [selectedLevel]: newAssignedWords
+        }));
       }
     }
-  }, [availableWords, assignedWords]);
+  }, [availableWords, assignedWords, selectedLevel]);
 
-  // Handle save
+  const handleEditWord = (word: Word) => {
+    setEditingWord(word);
+    editForm.setFieldsValue({
+      word: word.word,
+      type: word.type,
+      level: word.level,
+      note: word.note || '',
+      image: word.image ? [{
+        uid: '-1',
+        name: 'word-image',
+        status: 'done',
+        url: word.image.startsWith('http') ? word.image : `https://s3.engkid.io.vn${word.image}`
+      }] : []
+    });
+    setIsEditModalVisible(true);
+  };
+
   const handleSave = async () => {
     try {
-      // Get all existing words for other levels
-      const otherLevelsWords = gameWords
-        .filter(word => word.level !== parseInt(selectedLevel))
-        .map((word, index) => ({
-          wordId: word.id,
-          level: word.level,
-          isActive: true,
-          order: word.games?.[0]?.game_words?.sequence_order || index + 1
-        }));
+      // Build word assignments from all levels
+      const allAssignments: Array<{
+        wordId: number;
+        level: number;
+        isActive: boolean;
+        order: number;
+      }> = [];
 
-      // Add new assignments for current level
-      const currentLevelAssignments = assignedWords.map((word, index) => ({
-        wordId: word.id,
-        level: parseInt(selectedLevel),
-        isActive: true,
-        order: index + 1
-      }));
+      // Process all level assignments
+      Object.keys(allLevelAssignments).forEach(level => {
+        const levelWords = allLevelAssignments[level];
+        levelWords.forEach((word, index) => {
+          allAssignments.push({
+            wordId: word.id,
+            level: parseInt(level),
+            isActive: true,
+            order: index + 1
+          });
+        });
+      });
 
-      // Combine both arrays
-      await updateGameWords([...otherLevelsWords, ...currentLevelAssignments]);
+      console.log('Saving word assignments:', {
+        totalAssignments: allAssignments.length,
+        byLevel: Object.keys(allLevelAssignments).reduce((acc, level) => {
+          acc[level] = allLevelAssignments[level].length;
+          return acc;
+        }, {} as any)
+      });
+
+      await updateGameWords(allAssignments);
       message.success('Words assigned successfully');
       if (currentReadingId) {
         navigate(`/reading/${currentReadingId}/games/${gameId}/edit`);
@@ -233,6 +446,7 @@ const AssignWordsPage: React.FC = () => {
       }
     } catch (error) {
       message.error('Failed to assign words');
+      console.error('Save error:', error);
     }
   };
 
@@ -261,7 +475,7 @@ const AssignWordsPage: React.FC = () => {
             <li className="breadcrumb-item"><a href="/dashboard">CMS</a></li>
             {currentReadingId ? (
               <>
-                <li className="breadcrumb-item"><a href={`/reading/${currentReadingId}`}>Reading Management</a></li>
+                <li className="breadcrumb-item"><a href={`/reading`}>Reading Management</a></li>
                 <li className="breadcrumb-item"><a href={`/reading/${currentReadingId}/games`}>View Game</a></li>
               </>
             ) : (
@@ -272,26 +486,38 @@ const AssignWordsPage: React.FC = () => {
         </nav>
       </div>
 
-      <Card
+      <StyledCard
         title="Manage Words"
         extra={
-          <Space>
+          <Space size="middle">
             <Button 
               type="primary"
               icon={<PlusOutlined />}
               onClick={() => setIsCreateModalVisible(true)}
+              size="large"
             >
               Add Word
             </Button>
-            <Button onClick={() => {
-              if (currentReadingId) {
-                navigate(`/reading/${currentReadingId}/games/${gameId}/edit`);
-              } else {
-                navigate('/games');
-              }
-            }}>
-              Back to Game
+            <Button 
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setIsCreateModalVisible(true)}
+              size="large"
+            >
+              Import Word
             </Button>
+            {/* <Button 
+              onClick={() => {
+                if (currentReadingId) {
+                  navigate(`/reading/${currentReadingId}/games/${gameId}/edit`);
+                } else {
+                  navigate('/games');
+                }
+              }}
+              size="large"
+            >
+              Back to Game
+            </Button> */}
           </Space>
         }
       >
@@ -299,11 +525,26 @@ const AssignWordsPage: React.FC = () => {
           activeKey={selectedLevel}
           onChange={key => setSelectedLevel(key)}
           items={[
-            { key: '1', label: 'Level 1' },
-            { key: '2', label: 'Level 2' },
-            { key: '3', label: 'Level 3' },
-            { key: '4', label: 'Level 4' },
-            { key: '5', label: 'Level 5' },
+            { 
+              key: '1', 
+              label: `Level 1 ${allLevelAssignments['1'] ? `(${allLevelAssignments['1'].length})` : '(0)'}` 
+            },
+            { 
+              key: '2', 
+              label: `Level 2 ${allLevelAssignments['2'] ? `(${allLevelAssignments['2'].length})` : '(0)'}` 
+            },
+            { 
+              key: '3', 
+              label: `Level 3 ${allLevelAssignments['3'] ? `(${allLevelAssignments['3'].length})` : '(0)'}` 
+            },
+            { 
+              key: '4', 
+              label: `Level 4 ${allLevelAssignments['4'] ? `(${allLevelAssignments['4'].length})` : '(0)'}` 
+            },
+            { 
+              key: '5', 
+              label: `Level 5 ${allLevelAssignments['5'] ? `(${allLevelAssignments['5'].length})` : '(0)'}` 
+            },
           ]}
         />
 
@@ -316,24 +557,33 @@ const AssignWordsPage: React.FC = () => {
         />
 
         <DragDropContext onDragEnd={handleDragEnd}>
-          <Space size="large" style={{ width: '100%', justifyContent: 'space-between' }}>
-            <div style={{ flex: 1 }}>
-              <h3>Available Words ({filteredAvailableWords.length})</h3>
+          <DragDropContainer>
+            <div>
+              <WordSectionHeader>Available Words ({filteredAvailableWords.length})</WordSectionHeader>
               <Droppable droppableId="available">
                 {(provided) => (
                   <WordContainer ref={provided.innerRef} {...provided.droppableProps}>
                     {filteredAvailableWords.length === 0 ? (
-                      <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>
-                        {loading ? 'Loading...' : 'No available words found'}
-                        {!loading && allWords.length === 0 && (
-                          <div style={{ marginTop: '10px', fontSize: '12px' }}>
-                            Debug: Total words loaded = {allWords.length}
+                      <div style={{ padding: '40px', textAlign: 'center', color: '#8c8c8c' }}>
+                        {loading ? (
+                          <div>
+                            <Spin size="large" />
+                            <p style={{ marginTop: '16px', fontSize: '16px' }}>Loading words...</p>
+                          </div>
+                        ) : (
+                          <div>
+                            <p style={{ fontSize: '16px', marginBottom: '8px' }}>No available words found</p>
+                            {allWords.length === 0 && (
+                              <p style={{ fontSize: '12px', color: '#bfbfbf' }}>
+                                Debug: Total words loaded = {allWords.length}
+                              </p>
+                            )}
                           </div>
                         )}
                       </div>
                     ) : (
                       filteredAvailableWords.map((word, index) => (
-                        <WordItem key={word.id} word={word} index={index} />
+                        <WordItem key={word.id} word={word} index={index} onEdit={handleEditWord} />
                       ))
                     )}
                     {provided.placeholder}
@@ -342,23 +592,35 @@ const AssignWordsPage: React.FC = () => {
               </Droppable>
             </div>
 
-            <div style={{ flex: 1 }}>
-              <h3>Selected Words ({assignedWords.length})</h3>
+            <div>
+              <WordSectionHeader>Selected Words ({assignedWords.length})</WordSectionHeader>
               <Droppable droppableId="assigned">
                 {(provided) => (
                   <WordContainer ref={provided.innerRef} {...provided.droppableProps}>
                     {assignedWords.length === 0 ? (
-                      <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>
-                        {loading ? 'Loading...' : 'No words selected'}
-                        {!loading && gameWords.length === 0 && (
-                          <div style={{ marginTop: '10px', fontSize: '12px' }}>
-                            Debug: Game words loaded = {gameWords.length}
+                      <div style={{ padding: '40px', textAlign: 'center', color: '#8c8c8c' }}>
+                        {loading ? (
+                          <div>
+                            <Spin size="large" />
+                            <p style={{ marginTop: '16px', fontSize: '16px' }}>Loading selected words...</p>
+                          </div>
+                        ) : (
+                          <div>
+                            <p style={{ fontSize: '16px', marginBottom: '8px' }}>No words selected</p>
+                            <p style={{ fontSize: '14px', color: '#bfbfbf' }}>
+                              Drag words from Available Words to select them
+                            </p>
+                            {gameWords.length === 0 && (
+                              <p style={{ fontSize: '12px', color: '#bfbfbf', marginTop: '8px' }}>
+                                Debug: Game words loaded = {gameWords.length}
+                              </p>
+                            )}
                           </div>
                         )}
                       </div>
                     ) : (
                       assignedWords.map((word, index) => (
-                        <WordItem key={word.id} word={word} index={index} />
+                        <WordItem key={word.id} word={word} index={index} onEdit={handleEditWord} />
                       ))
                     )}
                     {provided.placeholder}
@@ -366,26 +628,33 @@ const AssignWordsPage: React.FC = () => {
                 )}
               </Droppable>
             </div>
-          </Space>
+          </DragDropContainer>
         </DragDropContext>
 
-        <div style={{ marginTop: 16, textAlign: 'right' }}>
-          <Space>
-            <Button onClick={() => {
-              if (currentReadingId) {
-                navigate(`/reading/${currentReadingId}/games/${gameId}/edit`);
-              } else {
-                navigate('/games');
-              }
-            }}>
+        <ActionButtonsContainer>
+          <Space size="large">
+            <Button 
+              onClick={() => {
+                if (currentReadingId) {
+                  navigate(`/reading/${currentReadingId}/games/${gameId}/edit`);
+                } else {
+                  navigate('/games');
+                }
+              }}
+              size="large"
+            >
               Cancel
             </Button>
-            <Button type="primary" onClick={handleSave}>
-              Save
+            <Button 
+              type="primary" 
+              onClick={handleSave}
+              size="large"
+            >
+              Save Changes
             </Button>
           </Space>
-        </div>
-      </Card>
+        </ActionButtonsContainer>
+      </StyledCard>
 
       <Modal
         title="Create New Word"
@@ -422,9 +691,17 @@ const AssignWordsPage: React.FC = () => {
               setIsCreateModalVisible(false);
               form.resetFields();
               
-              // Add new word to available words list
-              if (newWord.level <= parseInt(selectedLevel)) {
-                setAvailableWords(prev => [...prev, newWord]);
+              // Add new word to available words list only if it matches current level
+              // and it's not already assigned to any level
+              if (newWord.level === parseInt(selectedLevel)) {
+                const allAssignedWordIds = new Set<number>();
+                Object.values(allLevelAssignments).forEach(levelWords => {
+                  levelWords.forEach(word => allAssignedWordIds.add(word.id));
+                });
+                
+                if (!allAssignedWordIds.has(newWord.id)) {
+                  setAvailableWords(prev => [...prev, newWord]);
+                }
               }
             } catch (error) {
               message.error('Failed to create word');
@@ -484,6 +761,147 @@ const AssignWordsPage: React.FC = () => {
               maxCount={1}
             >
               <Button icon={<UploadOutlined />}>Upload Image</Button>
+            </Upload>
+          </Form.Item>
+
+          <Form.Item
+            name="note"
+            label="Note"
+          >
+            <Input.TextArea rows={3} maxLength={1000} showCount />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="Edit Word"
+        open={isEditModalVisible}
+        onOk={editForm.submit}
+        onCancel={() => {
+          setIsEditModalVisible(false);
+          setEditingWord(null);
+          editForm.resetFields();
+        }}
+        confirmLoading={editing}
+        width={600}
+      >
+        <Form
+          form={editForm}
+          layout="vertical"
+          onFinish={async (values) => {
+            if (!editingWord) return;
+            
+            try {
+              const formData = new FormData();
+              
+              // Append word data fields
+              formData.append('word', values.word);
+              formData.append('type', values.type.toString());
+              formData.append('level', values.level.toString());
+              formData.append('note', values.note || '');
+              formData.append('is_active', '1');
+              
+              // Append file if exists and is a new upload
+              if (values.image && values.image[0] && values.image[0].originFileObj) {
+                formData.append('image', values.image[0].originFileObj);
+              }
+
+              const updatedWord = await editWord(editingWord.id, formData);
+              message.success('Word updated successfully');
+              
+              // Update the word in local state
+              const updateWordInState = (words: Word[]) => {
+                return words.map(word => 
+                  word.id === editingWord.id ? { ...updatedWord } : word
+                );
+              };
+              
+              // Update available words if the word is in current available list
+              setAvailableWords(prev => updateWordInState(prev));
+              
+              // Update assigned words if the word is in current assigned list
+              setAssignedWords(prev => updateWordInState(prev));
+              
+              // Update persistent assignments
+              setAllLevelAssignments(prev => {
+                const updated = { ...prev };
+                Object.keys(updated).forEach(level => {
+                  updated[level] = updateWordInState(updated[level]);
+                });
+                return updated;
+              });
+              
+              setIsEditModalVisible(false);
+              setEditingWord(null);
+              editForm.resetFields();
+            } catch (error) {
+              message.error('Failed to update word');
+            }
+          }}
+        >
+          <Form.Item
+            name="word"
+            label="Word"
+            rules={[{ required: true, message: 'Please input the word' }]}
+          >
+            <Input maxLength={100} showCount />
+          </Form.Item>
+
+          <Form.Item
+            name="type"
+            label="Word Type"
+            rules={[{ required: true, message: 'Please select word type' }]}
+          >
+            <Select>
+              <Select.Option value={1}>Noun</Select.Option>
+              <Select.Option value={2}>Verb</Select.Option>
+              <Select.Option value={3}>Adjective</Select.Option>
+              <Select.Option value={4}>Adverb</Select.Option>
+              <Select.Option value={5}>Preposition</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="level"
+            label="Level"
+            rules={[{ required: true, message: 'Please select level' }]}
+          >
+            <Select>
+              <Select.Option value={1}>Level 1</Select.Option>
+              <Select.Option value={2}>Level 2</Select.Option>
+              <Select.Option value={3}>Level 3</Select.Option>
+              <Select.Option value={4}>Level 4</Select.Option>
+              <Select.Option value={5}>Level 5</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="image"
+            label="Image"
+            valuePropName="fileList"
+            getValueFromEvent={(e) => {
+              if (Array.isArray(e)) {
+                return e;
+              }
+              return e?.fileList;
+            }}
+          >
+            <Upload
+              accept="image/*"
+              beforeUpload={() => false}
+              maxCount={1}
+              listType="picture-card"
+              showUploadList={{
+                showPreviewIcon: true,
+                showRemoveIcon: true,
+              }}
+            >
+              {(!editForm.getFieldValue('image') || editForm.getFieldValue('image').length === 0) && (
+                <div>
+                  <UploadOutlined />
+                  <div style={{ marginTop: 8 }}>Upload Image</div>
+                </div>
+              )}
             </Upload>
           </Form.Item>
 

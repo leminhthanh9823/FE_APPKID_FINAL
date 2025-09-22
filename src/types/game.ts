@@ -15,24 +15,29 @@ export interface Game {
   name: string;
   description?: string;
   type: number;
-  prerequisite_reading_id: number;
+  image?: string;
+  prerequisite_reading_id?: number;
   sequence_order: number;
   is_active: number;
   created_at: string;
   updated_at: string;
   prerequisiteReading?: PrerequisiteReading;
+  studentCompletionCount?: number;
+  wordCount?: number;
 }
 
 export interface CreateGameDto {
   name: string;
   description?: string;
   type: number;
+  image?: string;
 }
 
 export interface UpdateGameDto {
   name?: string;
   description?: string;
   type?: number;
+  image?: string;
 }
 
 export enum GameStatus {

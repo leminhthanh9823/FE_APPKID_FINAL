@@ -16,6 +16,7 @@ const GamesPage: React.FC = () => {
     updateGame,
     deleteGame,
     changeGameStatus,
+    reorderGames,
   } = useGameManagement();
 
   useEffect(() => {
@@ -25,16 +26,21 @@ const GamesPage: React.FC = () => {
   }, [error]);
 
   const handleCreateGame = () => {
-    if (!readingId) {
-      message.error('Reading ID is required to create a game');
-      return;
+    if (readingId) {
+      navigate(`/reading/${readingId}/games/create`);
+    } else {
+      // Navigate to a general game creation page if no specific reading
+      navigate('/games/create');
     }
-    navigate(`/reading/${readingId}/games/create`);
   };
 
   const handleEditGame = (game: Game) => {
     // Use absolute path to avoid appending to current URL
-    navigate(`/reading/${game.prerequisite_reading_id}/games/${game.id}/edit`);
+    if (game.prerequisite_reading_id) {
+      navigate(`/reading/${game.prerequisite_reading_id}/games/${game.id}/edit`);
+    } else {
+      navigate(`/games/${game.id}/edit`);
+    }
   };
 
   const handleDeleteGame = async (gameId: number) => {
@@ -52,6 +58,14 @@ const GamesPage: React.FC = () => {
       message.success('Game status updated successfully');
     } catch (error) {
       message.error('Failed to update game status');
+    }
+  };
+
+  const handleReorderGames = async (reorderedGames: Game[]) => {
+    try {
+      await reorderGames(reorderedGames);
+    } catch (error) {
+      message.error('Failed to reorder games');
     }
   };
 
@@ -90,6 +104,7 @@ const GamesPage: React.FC = () => {
           onEditGame={handleEditGame}
           onDeleteGame={handleDeleteGame}
           onStatusChange={handleStatusChange}
+          onReorderGames={handleReorderGames}
         />
       </div>
     </main>

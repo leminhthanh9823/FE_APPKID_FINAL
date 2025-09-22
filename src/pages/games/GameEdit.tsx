@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Form, Input, Select, Switch, Card, Table, Button, Spin, message } from 'antd';
+import { Form, Input, Select, Switch, Card, Table, Button, Spin, message, Upload } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
 import useGameEdit from '../../hooks/useGameEdit';
 import AssignWordsModal from '../../components/games/words/AssignWordsModal';
 
@@ -18,6 +19,9 @@ const GameEdit: React.FC = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   
+  // Handle case where gameId might be in different param position
+  const actualGameId = gameId || useParams().gameId;
+  
   const {
     game,
     allWords,
@@ -25,39 +29,47 @@ const GameEdit: React.FC = () => {
     loading,
     updateGame,
     updateGameWords
-  } = useGameEdit(gameId || '');
+  } = useGameEdit(actualGameId || '');
 
   // Handle form submission for game details
   const handleSubmit = async (values: any) => {
     await updateGame(values);
   };
 
-  // Handle word status toggle
-  const handleWordStatusChange = async (wordId: number, isActive: boolean) => {
-    const wordToUpdate = gameWords.find(w => w.id === wordId);
-    if (wordToUpdate) {
-      const sequenceOrder = (wordToUpdate as any).games?.[0]?.game_words?.sequence_order || 1;
-      await updateGameWords([{
-        wordId,
-        level: wordToUpdate.level,
-        isActive,
-        order: sequenceOrder
-      }]);
-    }
-  };
-
   // Word list columns
   const columns = [
     {
-      title: '#',
-      dataIndex: 'order',
-      key: 'order',
-      width: 60,
+      title: 'Image',
+      dataIndex: 'image',
+      key: 'image',
+      width: 100,
+      render: (image: string) => 
+        image ? (
+          <img 
+            src={image.startsWith('http') ? image : `https://s3.engkid.io.vn${image}`} 
+            alt="Word" 
+            style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 4 }}
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = '/assets/no-image-available.png';
+            }}
+          />
+        ) : (
+          <img 
+            src="/assets/no-image-available.png" 
+            alt="No image" 
+            style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 4 }}
+          />
+        )
     },
     {
       title: 'Word',
       dataIndex: 'word',
       key: 'word',
+    },
+    {
+      title: 'Note',
+      dataIndex: 'note',
+      key: 'note',
     },
     {
       title: 'Level',
@@ -67,16 +79,15 @@ const GameEdit: React.FC = () => {
       render: (level: number) => `Level: ${level}`
     },
     {
-      title: 'Status',
-      key: 'status',
-      width: 100,
-      render: (record: any) => (
-        <Switch
-          checked={record.isActive}
-          onChange={(checked) => handleWordStatusChange(record.id, checked)}
-        />
-      )
-    }
+      title: 'Type',
+      dataIndex: 'type',
+      key: 'type',
+      width: 120,
+      render: (type: number) => {
+        const gameType = gameTypes.find(gt => gt.value === type);
+        return gameType ? gameType.label : `Type: ${type}`;
+      }
+    },
   ];
 
   if (loading) {
@@ -105,10 +116,12 @@ const GameEdit: React.FC = () => {
               <a href="/dashboard">CMS</a>
             </li>
             <li className="breadcrumb-item">
-              <a href={`/reading/${readingId}`}>Reading Management</a>
+              <a href={`/kid-reading`}>Reading Management</a>
             </li>
             <li className="breadcrumb-item">
-              <a href={`/reading/${readingId}/games`}>View Game</a>
+              <a href={readingId ? `/reading/${readingId}/games` : '/games'}>
+                {readingId ? 'View Game' : 'Games'}
+              </a>
             </li>
             <li className="breadcrumb-item active">Edit Game</li>
           </ol>
@@ -120,7 +133,16 @@ const GameEdit: React.FC = () => {
           <Form
             form={form}
             layout="vertical"
-            initialValues={game}
+            initialValues={{
+              ...game,
+              isActive: Boolean(game?.is_active),
+              image: game?.image ? [{
+                uid: '-1',
+                name: 'game-image',
+                status: 'done',
+                url: game.image.startsWith('http') ? game.image : `https://s3.engkid.io.vn${game.image}`
+              }] : []
+            }}
             onFinish={handleSubmit}
           >
             <Form.Item
@@ -146,11 +168,55 @@ const GameEdit: React.FC = () => {
             </Form.Item>
 
             <Form.Item
+              name="image"
+              label="Game Image"
+              valuePropName="fileList"
+              getValueFromEvent={(e) => {
+                if (Array.isArray(e)) {
+                  return e;
+                }
+                return e?.fileList;
+              }}
+            >
+              <Upload
+                name="image"
+                listType="picture-card"
+                maxCount={1}
+                beforeUpload={(file) => {
+                  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/gif';
+                  if (!isJpgOrPng) {
+                    message.error('You can only upload JPG/PNG/GIF files!');
+                  }
+                  const isLt2M = file.size / 1024 / 1024 < 2;
+                  if (!isLt2M) {
+                    message.error('Image must smaller than 2MB!');
+                  }
+                  return false;
+                }}
+                showUploadList={{
+                  showPreviewIcon: true,
+                  showRemoveIcon: true,
+                }}
+              >
+                <div>
+                  <UploadOutlined />
+                  <div style={{ marginTop: 8 }}>Upload Image</div>
+                </div>
+              </Upload>
+            </Form.Item>
+
+            <Form.Item
               name="isActive"
               label="Status"
-              valuePropName="checked"
+              rules={[{ required: true, message: 'Please select status' }]}
             >
-              <Switch checkedChildren="Active" unCheckedChildren="Inactive" />
+              <Select
+                options={[
+                  { value: true, label: 'Active' },
+                  { value: false, label: 'Inactive' }
+                ]}
+                placeholder="Select status"
+              />
             </Form.Item>
 
             <Form.Item>
@@ -162,11 +228,11 @@ const GameEdit: React.FC = () => {
         </Card>
 
         <Card 
-          title="📝 Associated Words" 
+          title="Associated Words" 
           extra={
             <Button 
               type="primary"
-              onClick={() => navigate(`/word/game/${gameId}/words`)}
+              onClick={() => navigate(`/word/game/${actualGameId}/words`)}
             >
               Manage Words
             </Button>
