@@ -136,3 +136,12 @@ export const SEARCH_AVAILABLE_READING = [
   { value: true, label: 'Available' },
   { value: false, label: 'In Learning Path' },
 ]
+
+export const GAME_TYPES = [
+  { value: 1, label: 'Wordle' },
+  { value: 2, label: 'Puzzle' }, 
+  { value: 3, label: 'Memory Game' },
+  { value: 4, label: 'Missing Word' },
+  { value: 5, label: 'Image Puzzle' },
+  { value: 6, label: 'Four pictures one word' },
+];  

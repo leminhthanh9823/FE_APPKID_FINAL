@@ -27,7 +27,7 @@ const GamesPage: React.FC = () => {
 
   const handleCreateGame = () => {
     if (readingId) {
-      navigate(`/reading/${readingId}/games/create`);
+      navigate(`/kid-reading/${readingId}/games/create`);
     } else {
       // Navigate to a general game creation page if no specific reading
       navigate('/games/create');
@@ -73,7 +73,6 @@ const GamesPage: React.FC = () => {
   const readingId = id;
 
   const pageTitle = readingId ? "Reading Games" : "Game Management";
-  const cardTitle = readingId ? `Games for Reading #${readingId}` : "All Games";
 
   return (
     <main className="main" id="main">
@@ -86,7 +85,7 @@ const GamesPage: React.FC = () => {
             </li>
             {readingId && (
               <li className="breadcrumb-item">
-                <a href="/reading">Reading</a>
+                <a href="/kid-reading">Reading</a>
               </li>
             )}
             <li className="breadcrumb-item active">{pageTitle}</li>
