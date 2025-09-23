@@ -6,6 +6,7 @@ import { TYPE_TARGET_OPTIONS } from "@/utils/constants/options";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import StudentOptions, { StudentOptionsRef } from "./type-notification-component/StudentOptions";
+import ParentOptions, { ParentOptionsRef } from "./type-notification-component/ParentOptions";
 
 const CreateNotification = () => {
 
@@ -21,13 +22,29 @@ const CreateNotification = () => {
   const [selectedTypeTarget, setSelectedTypeTarget] = useState<number>(TYPE_TARGET_OPTIONS[0].value);
   const { saveChanges } = usePostItemJson(`${ENDPOINT.NOTIFY}/cms/create`);
   const studentRef = useRef<StudentOptionsRef>(null);
+  const parentRef = useRef<ParentOptionsRef>(null);
 
   const handleInputChange = (name: string, value: any) => {
     setReqNotiCreate((prev) => prev ? { ...prev, [name]: value } : prev);
   };
 
 
-  const onSelectRow = (row: any) => {
+
+  const onSelectParentRow = (row: any) => {
+    setReqNotiCreate((prev) => {
+      if (prev) {
+        const parents = prev.parents || [];
+        const isSelected = parents.includes(row.id);
+        return {
+          ...prev,
+          parents: isSelected ? parents.filter((parentId) => parentId !== row.id) : [...parents, row.id],
+        };
+      }
+      return prev;
+    });
+  };
+
+  const onSelectStudentRow = (row: any) => {
     setReqNotiCreate((prev) => {
       if (prev) {
         const students = prev.students || [];
@@ -68,16 +85,15 @@ const CreateNotification = () => {
   const handleSubmit = async () => {
     if (!validateForm()) return;
     let payload;
-    //sửa thành parentReff
-    // if(selectedTypeTarget === 1 && gradeRef.current?.validate()) {
-    //   toast.error("Please select at least one grade.");
-    // }
+    if(selectedTypeTarget === 1 && parentRef.current?.validate()) {
+      toast.error("Please select at least one parent.");
+    }
     if(selectedTypeTarget === 2 && studentRef.current?.validate()) {
       toast.error("Please select at least one student.");
     }
     payload = {
       ...reqNotiCreate,
-      // grades: selectedTypeTarget === 1 ? reqNotiCreate.grades : null,
+      parents: selectedTypeTarget === 1 ? reqNotiCreate.parents : null,
       students: selectedTypeTarget === 2 ? reqNotiCreate.students : null,
       type_target: selectedTypeTarget,
     }
@@ -158,21 +174,22 @@ const CreateNotification = () => {
           </div>
 
 
-          {/*
-          Sửa thành chọn parents {
-            selectedTypeTarget === 1 && (
-             <GradeOptions
-                grades={reqNotiCreate.grades}
-                onChange={(grades) => handleInputChange("grades", grades)}
-             />
-            )
-          } */}
+          
+          {
+        selectedTypeTarget === 1 && (
+         <ParentOptions
+           parents={reqNotiCreate.parents || []}
+           onSelectRow={onSelectParentRow}
+           handleClearSelection={handleClearSelection}
+         />
+        )
+          }
 
           {
             selectedTypeTarget === 2 && (
               <StudentOptions
                 students={reqNotiCreate.students || []}
-                onSelectRow={(row: any) => onSelectRow(row)}
+                onSelectRow={onSelectStudentRow}
                 handleClearSelection={handleClearSelection}
               />
             )
