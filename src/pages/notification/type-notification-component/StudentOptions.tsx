@@ -38,7 +38,6 @@ const StudentOptions = React.forwardRef<StudentOptionsRef, StudentOptionsProps>(
   const [pageSize, setPageSize] = useState<number>(
     Number(localStorage.getItem(Constants.LOCAL_STORAGE_KEY + "-" + ENDPOINT.STUDENT)) || 10
   );
-  const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
 
   const { data, totalRecords, totalPages, setParams } = useFetchStudentManagement(
     `${ENDPOINT.STUDENT}/students-parents`,
@@ -46,7 +45,6 @@ const StudentOptions = React.forwardRef<StudentOptionsRef, StudentOptionsProps>(
       pageNumb: currentPage,
       pageSize: pageSize,
       searchTerm: searchTerm || null,
-      grade_id: selectedGrade || null,
     }
   );
 
@@ -54,27 +52,20 @@ const StudentOptions = React.forwardRef<StudentOptionsRef, StudentOptionsProps>(
     localStorage.setItem(Constants.LOCAL_STORAGE_KEY + "-" + ENDPOINT.READING, newSize.toString());
     setPageSize(newSize);
     setCurrentPage(1);
-    handleParamsChange(1, searchTerm, newSize, selectedGrade);
+    handleParamsChange(1, searchTerm, newSize);
   };
 
-  const handleGradeChange = (selectedOption: { value: number | null; label: string } | null) => {
-    const newGrade = selectedOption ? selectedOption.value : null;
-    setSelectedGrade(newGrade);
-    setCurrentPage(1);
-    handleParamsChange(1, searchTerm, pageSize, newGrade);
-  };
+  // Đã xóa handleGradeChange
 
   const handleParamsChange = (
     page: number,
     search: string,
-    size: number,
-    grade: number | null
+    size: number
   ) => {
     setParams({
       pageNumb: page,
       pageSize: size,
       searchTerm: search || null,
-      grade_id: grade || null,
     });
   };
 
@@ -82,22 +73,14 @@ const StudentOptions = React.forwardRef<StudentOptionsRef, StudentOptionsProps>(
     <div className="card" >
       <h5 className="card-title">Select students</h5>
       <div className="card-body">
-        <div style={{ width: '200px' }}>
-          <Select
-            id="grade-filter"
-            options={GRADE_OPTIONS}
-            onChange={handleGradeChange}
-            value={GRADE_OPTIONS.find(option => option.value === selectedGrade)}
-            placeholder="Select Grade"
-          />
-        </div>
+        {/* Đã xóa filter grade_id */}
         <Table
           columns={StudentSelectColumns}
           data={data}
           onSearch={(term) => {
             setSearchTerm(term);
             setCurrentPage(1);
-            handleParamsChange(1, term, pageSize, selectedGrade);
+            handleParamsChange(1, term, pageSize);
           }}
           endpoint={ENDPOINT.STUDENT}
           isCreatable={false}
@@ -123,7 +106,7 @@ const StudentOptions = React.forwardRef<StudentOptionsRef, StudentOptionsProps>(
           currentPage={currentPage}
           onPageChange={(page: number) => {
             setCurrentPage(page);
-            handleParamsChange(page, searchTerm, pageSize, selectedGrade);
+            handleParamsChange(page, searchTerm, pageSize);
           }}
           onPageSizeChange={handlePageResize}
           totalPage={totalPages}

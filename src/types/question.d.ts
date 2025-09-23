@@ -2,7 +2,6 @@ export interface QuestionRecord {
   id: number;
   question_level_id: number;
   kid_reading_id: number;
-  grade_id: number;
   question_category_id: number;
   question: string;
   question_type: string;

@@ -27,7 +27,6 @@ const Reading: React.FC = () => {
       localStorage.getItem(Constants.LOCAL_STORAGE_KEY + '-' + ENDPOINT.READING)
     ) || 10
   );
-  const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [readingCreateFields, setReadingCreateFields] =
@@ -53,7 +52,7 @@ const Reading: React.FC = () => {
       pageSize: pageSize,
       sorts: null,
       searchTerm: searchTerm === '' ? null : searchTerm,
-      grade_id: selectedGrade,
+  // Đã xóa grade_id
       is_active: selectedStatus,
     });
 
@@ -64,7 +63,6 @@ const Reading: React.FC = () => {
         currentPage,
         searchTerm,
         pageSize,
-        selectedGrade,
         selectedStatus
       );
     },
@@ -118,7 +116,6 @@ const Reading: React.FC = () => {
       page: number,
       search: string,
       size: number,
-      grade: number | null,
       status: number | null
     ) => {
       setIsTableLoading(true);
@@ -127,7 +124,6 @@ const Reading: React.FC = () => {
         pageSize: size,
         sorts: null,
         searchTerm: search === '' ? null : search,
-        grade_id: grade,
         is_active: status,
       });
     },
@@ -139,7 +135,6 @@ const Reading: React.FC = () => {
       currentPage,
       searchTerm,
       pageSize,
-      selectedGrade,
       selectedStatus
     );
     if (error) toast.error(error);
@@ -147,7 +142,6 @@ const Reading: React.FC = () => {
     currentPage,
     pageSize,
     searchTerm,
-    selectedGrade,
     selectedStatus,
     selectedCategory,
     handleParamsChange,
@@ -163,14 +157,7 @@ const Reading: React.FC = () => {
     setCurrentPage(1);
   }, []);
 
-  const handleGradeChange = useCallback(
-    (selectedOption: { value: number | null; label: string } | null) => {
-      const newGrade = selectedOption ? selectedOption.value : null;
-      setSelectedGrade(newGrade);
-      setCurrentPage(1);
-    },
-    []
-  );
+  // Đã xóa handleGradeChange
 
   const handleStatusChange = useCallback(
     (selectedOption: { value: number | null; label: string } | null) => {
@@ -221,10 +208,6 @@ const Reading: React.FC = () => {
           const activeValue =
             item.is_active !== undefined ? Number(item.is_active) : field.value;
           return { ...field, value: activeValue };
-        } else if (field.name === 'grade_id' && field.type === 'select') {
-          const gradeValue =
-            item.grade_id !== undefined ? Number(item.grade_id) : field.value;
-          return { ...field, value: gradeValue };
         }
         return { ...field, value: item[field.name] || field.value };
       });
@@ -281,17 +264,7 @@ const Reading: React.FC = () => {
                     ))}
                   </select>
                 </div>
-                <div style={{ width: '200px' }}>
-                  <Select
-                    id="grade-filter"
-                    options={GRADE_OPTIONS}
-                    onChange={handleGradeChange}
-                    value={GRADE_OPTIONS.find(
-                      (option) => option.value === selectedGrade
-                    )}
-                    placeholder="Select Grade"
-                  />
-                </div>
+                {/* Đã xóa filter grade_id */}
                 <div style={{ width: '200px' }}>
                   <Select
                     id="status-filter"

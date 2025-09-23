@@ -51,17 +51,6 @@ export const ReadingColumns: Column[] = [
     },
   },
   {
-    key: 'grades',
-    label: 'Grades',
-        format: (value: any) => {
-          if (Array.isArray(value) && value.length > 0) {
-            const sorted = value.slice().sort((a, b) => a - b);
-            return sorted.join(', ');
-          }
-          return 'N/A';
-        },
-  },
-  {
     key: 'is_active',
     label: 'Status',
     format: (value: any) => (
