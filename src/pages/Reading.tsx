@@ -10,7 +10,7 @@ import { ReadingColumns } from '../utils/constants/columns/readingColumns';
 import { ReadingCreateFields } from '../utils/constants/create_fields/readingCreateFields';
 import { Constants } from '@/utils/constants/constants';
 import Select from 'react-select';
-import { GRADE_OPTIONS, STATUS_OPTIONS } from '@/utils/constants/options';
+import { STATUS_OPTIONS } from '@/utils/constants/options';
 import { ROUTES } from '@/routers/routes';
 import { buildRoute } from '@/utils/helper/routeHelper';
 import useFetchEBookCategory from '@/hooks/useFetchEBookCategory';
@@ -52,7 +52,6 @@ const Reading: React.FC = () => {
       pageSize: pageSize,
       sorts: null,
       searchTerm: searchTerm === '' ? null : searchTerm,
-  // Đã xóa grade_id
       is_active: selectedStatus,
     });
 
@@ -85,7 +84,7 @@ const Reading: React.FC = () => {
       }));
 
       const updatedCreateFields = ReadingCreateFields.map((field) => {
-        if (field.name === 'categories' && field.type === 'multi-select') {
+        if (field.name === 'category_id' && field.type === 'select') {
           return { ...field, options: categoryOptions };
         }
 
@@ -93,7 +92,7 @@ const Reading: React.FC = () => {
       });
 
       const updatedEditFields = ReadingEditFields.map((field) => {
-        if (field.name === 'categories' && field.type === 'multi-select') {
+        if (field.name === 'category' && field.type === 'select') {
           return { ...field, options: categoryOptions };
         }
 
@@ -157,8 +156,6 @@ const Reading: React.FC = () => {
     setCurrentPage(1);
   }, []);
 
-  // Đã xóa handleGradeChange
-
   const handleStatusChange = useCallback(
     (selectedOption: { value: number | null; label: string } | null) => {
       const newStatus = selectedOption ? selectedOption.value : null;
@@ -176,6 +173,7 @@ const Reading: React.FC = () => {
   const handleSearch = useCallback((searchTerm: string) => {
     setSearchTerm(searchTerm);
     setCurrentPage(1);
+    handleParamsChange(1, searchTerm, pageSize, selectedStatus);
   }, []);
 
   const handlePageChange = useCallback((page: number) => {
@@ -237,7 +235,7 @@ const Reading: React.FC = () => {
           }}
         >
           <Table
-            tableName="Readings list"
+            tableName="Readings"
             customView={
               <div
                 style={{
@@ -264,7 +262,6 @@ const Reading: React.FC = () => {
                     ))}
                   </select>
                 </div>
-                {/* Đã xóa filter grade_id */}
                 <div style={{ width: '200px' }}>
                   <Select
                     id="status-filter"
@@ -280,7 +277,6 @@ const Reading: React.FC = () => {
             }
             createFields={readingCreateFields}
             editFields={readingEditFields}
-            prepareEditFields={processEditFieldsWithRelations}
             columns={ReadingColumns}
             data={data}
             onSearch={handleSearch}

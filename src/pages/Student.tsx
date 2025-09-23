@@ -4,15 +4,11 @@ import { toast } from 'react-toastify';
 import Pagination from '../components/Pagination';
 import { ENDPOINT } from '../routers/endpoint';
 import { Constants } from '@/utils/constants/constants';
-import Select from 'react-select';
-import { GRADE_OPTIONS } from '@/utils/constants/options';
 import { ROUTES } from '@/routers/routes';
 import { buildRoute } from '@/utils/helper/routeHelper';
 import { StudentManageColumns } from '@/utils/constants/columns/student/studentManageColumn';
 import useFetchStudentManagement from '@/hooks/useFetchStudentManagement';
 import useToggleStatus from '@/hooks/useToggleStatus';
-import RoleGuard from '@/components/RoleGuard';
-import { UserRole } from '@/routers/PrivateRoute';
 import { useAuth } from '@/hooks/useAuth';
 
 const Student: React.FC = () => {
@@ -24,8 +20,6 @@ const Student: React.FC = () => {
       localStorage.getItem(Constants.LOCAL_STORAGE_KEY + '-' + ENDPOINT.STUDENT)
     ) || 10
   );
-  const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
-
   const { isAdmin, isTeacher } = useAuth();
 
   const { data, error, totalRecords, totalPages, setParams } =
@@ -33,7 +27,6 @@ const Student: React.FC = () => {
       pageNumb: currentPage,
       pageSize: pageSize,
       searchTerm: searchTerm || null,
-      grade_id: selectedGrade || null,
     });
 
   useEffect(() => {
@@ -48,7 +41,7 @@ const Student: React.FC = () => {
   const { toggleStatus } = useToggleStatus({
     endpoint: ENDPOINT.STUDENT,
     onSuccess: () => {
-      handleParamsChange(currentPage, searchTerm, pageSize, selectedGrade);
+      handleParamsChange(currentPage, searchTerm, pageSize);
     },
   });
 
@@ -60,30 +53,18 @@ const Student: React.FC = () => {
       );
       setPageSize(newSize);
       setCurrentPage(1);
-      handleParamsChange(1, searchTerm, newSize, selectedGrade);
+      handleParamsChange(1, searchTerm, newSize);
     },
-    [searchTerm, selectedGrade]
-  );
-
-  const handleGradeChange = useCallback(
-    (selectedOption: { value: number | null; label: string } | null) => {
-      const newGrade = selectedOption ? selectedOption.value : null;
-      setSelectedGrade(newGrade);
-      setCurrentPage(1);
-      setIsTableLoading(true);
-      handleParamsChange(1, searchTerm, pageSize, newGrade);
-    },
-    [searchTerm, pageSize]
+    [searchTerm]
   );
 
   const handleParamsChange = useCallback(
-    (page: number, search: string, size: number, grade: number | null) => {
+    (page: number, search: string, size: number) => {
       setIsTableLoading(true);
       setParams({
         pageNumb: page,
         pageSize: size,
         searchTerm: search || null,
-        grade_id: grade || null,
       });
     },
     [setParams]
@@ -93,17 +74,17 @@ const Student: React.FC = () => {
     (term: string) => {
       setSearchTerm(term);
       setCurrentPage(1);
-      handleParamsChange(1, term, pageSize, selectedGrade);
+      handleParamsChange(1, term, pageSize);
     },
-    [pageSize, selectedGrade, handleParamsChange]
+    [pageSize, handleParamsChange]
   );
 
   const handlePageChange = useCallback(
     (page: number) => {
       setCurrentPage(page);
-      handleParamsChange(page, searchTerm, pageSize, selectedGrade);
+      handleParamsChange(page, searchTerm, pageSize);
     },
-    [searchTerm, pageSize, selectedGrade, handleParamsChange]
+    [searchTerm, pageSize, handleParamsChange]
   );
 
   return (
@@ -137,17 +118,6 @@ const Student: React.FC = () => {
                   alignItems: 'center',
                 }}
               >
-                <div style={{ width: '200px' }}>
-                  <Select
-                    id="grade-filter"
-                    options={GRADE_OPTIONS}
-                    onChange={handleGradeChange}
-                    value={GRADE_OPTIONS.find(
-                      (option) => option.value === selectedGrade
-                    )}
-                    placeholder="Select Grade"
-                  />
-                </div>
               </div>
             }
             columns={StudentManageColumns}

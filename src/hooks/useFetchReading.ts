@@ -10,7 +10,6 @@ interface FetchParams {
   sorts?: string | null;
   searchTerm?: string | null;
   is_active?: number | null;
-  grade_id?: number | null;
 }
 
 interface ApiResponse<T> {

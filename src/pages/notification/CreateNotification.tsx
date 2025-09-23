@@ -2,15 +2,10 @@ import { ICreateNotificationRequest } from "@/diagram/request/notification/creat
 import usePostItemJson from "@/hooks/usePostItemJson";
 import { ENDPOINT } from "@/routers/endpoint";
 import { ROUTES } from "@/routers/routes";
-import { TYPE_NOTIFY_UC_OPTIONS, TYPE_TARGET_OPTIONS } from "@/utils/constants/options";
+import { TYPE_TARGET_OPTIONS } from "@/utils/constants/options";
 import { useEffect, useRef, useState } from "react";
-import GradeOptions, { GradeOptionsRef } from "./type-notification-component/GradeOptions";
 import { toast } from "react-toastify";
 import StudentOptions, { StudentOptionsRef } from "./type-notification-component/StudentOptions";
-import { MESSAGE } from "@/utils/constants/errorMessage";
-import { VIETNAM_TIMEZONE_OFFSET_HOURS } from "@/utils/constants/constants";
-
-
 
 const CreateNotification = () => {
 
@@ -20,13 +15,11 @@ const CreateNotification = () => {
     type_target: TYPE_TARGET_OPTIONS[0].value,
     is_active: true,
     send_date: new Date(),
-    grades: null,
+    parents: null,
     students: null
   });
   const [selectedTypeTarget, setSelectedTypeTarget] = useState<number>(TYPE_TARGET_OPTIONS[0].value);
-  const [minDateTime, setMinDateTime] = useState('');
   const { saveChanges } = usePostItemJson(`${ENDPOINT.NOTIFY}/cms/create`);
-  const gradeRef = useRef<GradeOptionsRef>(null);
   const studentRef = useRef<StudentOptionsRef>(null);
 
   const handleInputChange = (name: string, value: any) => {
@@ -75,15 +68,16 @@ const CreateNotification = () => {
   const handleSubmit = async () => {
     if (!validateForm()) return;
     let payload;
-    if(selectedTypeTarget === 1 && gradeRef.current?.validate()) {
-      toast.error("Please select at least one grade.");
-    }
-    else if(selectedTypeTarget === 2 && studentRef.current?.validate()) {
+    //sửa thành parentReff
+    // if(selectedTypeTarget === 1 && gradeRef.current?.validate()) {
+    //   toast.error("Please select at least one grade.");
+    // }
+    if(selectedTypeTarget === 2 && studentRef.current?.validate()) {
       toast.error("Please select at least one student.");
     }
     payload = {
       ...reqNotiCreate,
-      grades: selectedTypeTarget === 1 ? reqNotiCreate.grades : null,
+      // grades: selectedTypeTarget === 1 ? reqNotiCreate.grades : null,
       students: selectedTypeTarget === 2 ? reqNotiCreate.students : null,
       type_target: selectedTypeTarget,
     }
@@ -163,14 +157,16 @@ const CreateNotification = () => {
             </select>
           </div>
 
-          {
+
+          {/*
+          Sửa thành chọn parents {
             selectedTypeTarget === 1 && (
              <GradeOptions
                 grades={reqNotiCreate.grades}
                 onChange={(grades) => handleInputChange("grades", grades)}
              />
             )
-          }
+          } */}
 
           {
             selectedTypeTarget === 2 && (

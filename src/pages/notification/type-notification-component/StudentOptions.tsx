@@ -1,15 +1,12 @@
-import React, { useState, useRef, useImperativeHandle } from "react";
-import { GRADE_OPTIONS } from "@/utils/constants/options";
+import React, { useState, useImperativeHandle } from "react";
 import { Constants } from "@/utils/constants/constants";
 import { ENDPOINT } from "@/routers/endpoint";
 import useFetchStudentManagement from "@/hooks/useFetchStudentManagement";
-import { StudentManageColumns } from "@/utils/constants/columns/student/studentManageColumn";
 import Table from "@/components/Table";
 import Pagination from "@/components/Pagination";
 import { buildRoute } from "@/utils/helper/routeHelper";
 import { ROUTES } from "@/routers/routes";
 import { StudentSelectColumns } from "@/utils/constants/columns/student/studentSelectColumn";
-import Select from 'react-select';
 
 export interface StudentOptionsProps {
   students?: number[];
@@ -38,7 +35,6 @@ const StudentOptions = React.forwardRef<StudentOptionsRef, StudentOptionsProps>(
   const [pageSize, setPageSize] = useState<number>(
     Number(localStorage.getItem(Constants.LOCAL_STORAGE_KEY + "-" + ENDPOINT.STUDENT)) || 10
   );
-
   const { data, totalRecords, totalPages, setParams } = useFetchStudentManagement(
     `${ENDPOINT.STUDENT}/students-parents`,
     {
@@ -55,12 +51,10 @@ const StudentOptions = React.forwardRef<StudentOptionsRef, StudentOptionsProps>(
     handleParamsChange(1, searchTerm, newSize);
   };
 
-  // Đã xóa handleGradeChange
-
   const handleParamsChange = (
     page: number,
     search: string,
-    size: number
+    size: number,
   ) => {
     setParams({
       pageNumb: page,
@@ -73,7 +67,6 @@ const StudentOptions = React.forwardRef<StudentOptionsRef, StudentOptionsProps>(
     <div className="card" >
       <h5 className="card-title">Select students</h5>
       <div className="card-body">
-        {/* Đã xóa filter grade_id */}
         <Table
           columns={StudentSelectColumns}
           data={data}
