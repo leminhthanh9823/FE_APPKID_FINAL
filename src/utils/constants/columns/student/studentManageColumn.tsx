@@ -23,10 +23,7 @@ export const StudentManageColumns = [
     label: 'Student',
     format: (value: any) => value || "N/A" 
   },
-  // { key: "student_dob", label: "Date of Birth", format: (value: any) => value || "N/A" },
-  { key: "student_grade", label: "Grade", format: (value: any) => value || "N/A" },
-  { key: "total_passed", label: "Total passed readings", format: (value: any) => value || "N/A" },
-  { key: "percent", label: "Completion rate", format: (value: any) => value ? `${value}%` : "0%" },
+  { key: "completed_count", label: "Total completed readings", format: (value: any) => value || "0" },
   { key: "parent_name", label: "Parent", format: (value: any) => value || "N/A" },
   { key: "parent_phone", label: "Phone number", format: (value: any) => value || "N/A" },
   { key: "parent_email", label: "Email", format: (value: any) => value || "N/A" },

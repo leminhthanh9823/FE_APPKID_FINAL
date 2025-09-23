@@ -9,24 +9,6 @@ export const STATUS_UC_OPTIONS = [
   { value: 0, label: "Inactive" },
 ];
 
-export const GRADE_OPTIONS = [
-  { value: null, label: 'All Grades' },
-  { value: 1, label: 'Grade 1' },
-  { value: 2, label: 'Grade 2' },
-  { value: 3, label: 'Grade 3' },
-  { value: 4, label: 'Grade 4' },
-  { value: 5, label: 'Grade 5' },
-];
-
-export const GRADE_UC_OPTIONS = [
-  { value: 1, label: 'Grade 1' },
-  { value: 2, label: 'Grade 2' },
-  { value: 3, label: 'Grade 3' },
-  { value: 4, label: 'Grade 4' },
-  { value: 5, label: 'Grade 5' },
-];
-
-
 export const LEVEL_DIFFICULT_OPTIONS = [
   { value: 1, label: 'Level 1' },
   { value: 2, label: 'Level 2' },
@@ -70,7 +52,7 @@ export const TYPE_NOTIFY_OPTIONS = [
 
 export const TYPE_TARGET_OPTIONS = [
   { value: 0, label: 'All' },
-  { value: 1, label: 'Grades' },
+  { value: 1, label: 'Parents' },
   { value: 2, label: 'Students' },
 ]
 

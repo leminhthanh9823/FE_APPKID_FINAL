@@ -8,7 +8,6 @@ export const HistoryReadingColumns = [
   },
   { key: "title", label: "Title", format: (value: any) => value || "N/A" },
   { key: "is_completed", label: "Completed", format: (value: any) => value ? "Yes" : "No" },
-  { key: "is_passed", label: "Passed", format: (value: any) => value ? "Yes" : "No" },
   { key: "duration", label: "Duration", format: (value: any) => value || "N/A" },
   { key: "star", label: "Star", format: (value: any) => value || "0" },
   { key: "score", label: "Score ", format: (value: any) => value || "0" },
