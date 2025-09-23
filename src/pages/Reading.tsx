@@ -180,6 +180,39 @@ const Reading: React.FC = () => {
     setCurrentPage(page);
   }, []);
 
+  const processEditFieldsWithRelations = useCallback(
+    (item: any, fields: Field[]) => {
+      return fields.map((field) => {
+        if (field.name === 'category_id' && field.type === 'multi-select') {
+          let categoryValues = [];
+          if (item.categories && Array.isArray(item.categories)) {
+            categoryValues = item.categories.map((cat: any) => cat.id);
+          } else if (item.category_id) {
+            categoryValues = Array.isArray(item.category_id)
+              ? item.category_id
+              : [item.category_id];
+          }
+          return { ...field, value: categoryValues };
+        } else if (
+          field.name === 'categories' &&
+          field.type === 'multi-select'
+        ) {
+          let categoryValues = [];
+          if (item.categories && Array.isArray(item.categories)) {
+            categoryValues = item.categories.map((cat: any) => cat.id);
+          }
+          return { ...field, value: categoryValues };
+        } else if (field.name === 'is_active' && field.type === 'select') {
+          const activeValue =
+            item.is_active !== undefined ? Number(item.is_active) : field.value;
+          return { ...field, value: activeValue };
+        }
+        return { ...field, value: item[field.name] || field.value };
+      });
+    },
+    []
+  );
+
   return (
     <>
       <main className="main" id="main">

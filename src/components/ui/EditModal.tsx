@@ -80,11 +80,7 @@ const EditModal: React.FC<EditModalProps> = ({
         ) {
           let extractedValue = dataToSend[key].value;
 
-          if (
-            field.name === 'is_active' ||
-            field.name === 'grade_id' ||
-            field.name === 'role_id'
-          ) {
+          if (field.name === 'is_active' || field.name === 'role_id') {
             extractedValue = Number(extractedValue);
           }
 

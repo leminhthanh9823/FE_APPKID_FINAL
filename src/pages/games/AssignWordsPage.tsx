@@ -475,7 +475,7 @@ const AssignWordsPage: React.FC = () => {
             <li className="breadcrumb-item"><a href="/dashboard">CMS</a></li>
             {currentReadingId ? (
               <>
-                <li className="breadcrumb-item"><a href={`/reading`}>Reading Management</a></li>
+                <li className="breadcrumb-item"><a href={`/kid-reading`}>Reading Management</a></li>
                 <li className="breadcrumb-item"><a href={`/reading/${currentReadingId}/games`}>View Game</a></li>
               </>
             ) : (
@@ -498,26 +498,6 @@ const AssignWordsPage: React.FC = () => {
             >
               Add Word
             </Button>
-            <Button 
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => setIsCreateModalVisible(true)}
-              size="large"
-            >
-              Import Word
-            </Button>
-            {/* <Button 
-              onClick={() => {
-                if (currentReadingId) {
-                  navigate(`/reading/${currentReadingId}/games/${gameId}/edit`);
-                } else {
-                  navigate('/games');
-                }
-              }}
-              size="large"
-            >
-              Back to Game
-            </Button> */}
           </Space>
         }
       >

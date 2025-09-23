@@ -49,8 +49,13 @@ const CreateGamePage: React.FC = () => {
         readingId: parseInt(readingId || '0'),
         isActive: 1
       } as CreateGameDto);
-      setCurrentGame(newGame);
       message.success('Game created successfully');
+      // Navigate to games list in reading after creation
+      if (readingId) {
+        navigate(`/reading/${readingId}/games`);
+      } else {
+        navigate('/games');
+      }
     } catch (error) {
       if (error instanceof Error) {
         message.error(error.message);
@@ -134,9 +139,7 @@ const CreateGamePage: React.FC = () => {
             <li className="breadcrumb-item">
               <a href="/dashboard">CMS</a>
             </li>
-            <li className="breadcrumb-item">
-              <a href="/games">Games</a>
-            </li>
+            <li className="breadcrumb-item"><a href={`/kid-reading`}>Reading Management</a></li>
             <li className="breadcrumb-item active">
               {currentGame ? 'Assign Words' : 'Create New Game'}
             </li>
