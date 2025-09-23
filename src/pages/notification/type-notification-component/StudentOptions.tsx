@@ -1,15 +1,12 @@
-import React, { useState, useRef, useImperativeHandle } from "react";
-import { GRADE_OPTIONS } from "@/utils/constants/options";
+import React, { useState, useImperativeHandle } from "react";
 import { Constants } from "@/utils/constants/constants";
 import { ENDPOINT } from "@/routers/endpoint";
 import useFetchStudentManagement from "@/hooks/useFetchStudentManagement";
-import { StudentManageColumns } from "@/utils/constants/columns/student/studentManageColumn";
 import Table from "@/components/Table";
 import Pagination from "@/components/Pagination";
 import { buildRoute } from "@/utils/helper/routeHelper";
 import { ROUTES } from "@/routers/routes";
 import { StudentSelectColumns } from "@/utils/constants/columns/student/studentSelectColumn";
-import Select from 'react-select';
 
 export interface StudentOptionsProps {
   students?: number[];
@@ -38,15 +35,12 @@ const StudentOptions = React.forwardRef<StudentOptionsRef, StudentOptionsProps>(
   const [pageSize, setPageSize] = useState<number>(
     Number(localStorage.getItem(Constants.LOCAL_STORAGE_KEY + "-" + ENDPOINT.STUDENT)) || 10
   );
-  const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
-
   const { data, totalRecords, totalPages, setParams } = useFetchStudentManagement(
     `${ENDPOINT.STUDENT}/students-parents`,
     {
       pageNumb: currentPage,
       pageSize: pageSize,
       searchTerm: searchTerm || null,
-      grade_id: selectedGrade || null,
     }
   );
 
@@ -54,27 +48,18 @@ const StudentOptions = React.forwardRef<StudentOptionsRef, StudentOptionsProps>(
     localStorage.setItem(Constants.LOCAL_STORAGE_KEY + "-" + ENDPOINT.READING, newSize.toString());
     setPageSize(newSize);
     setCurrentPage(1);
-    handleParamsChange(1, searchTerm, newSize, selectedGrade);
-  };
-
-  const handleGradeChange = (selectedOption: { value: number | null; label: string } | null) => {
-    const newGrade = selectedOption ? selectedOption.value : null;
-    setSelectedGrade(newGrade);
-    setCurrentPage(1);
-    handleParamsChange(1, searchTerm, pageSize, newGrade);
+    handleParamsChange(1, searchTerm, newSize);
   };
 
   const handleParamsChange = (
     page: number,
     search: string,
     size: number,
-    grade: number | null
   ) => {
     setParams({
       pageNumb: page,
       pageSize: size,
       searchTerm: search || null,
-      grade_id: grade || null,
     });
   };
 
@@ -82,22 +67,13 @@ const StudentOptions = React.forwardRef<StudentOptionsRef, StudentOptionsProps>(
     <div className="card" >
       <h5 className="card-title">Select students</h5>
       <div className="card-body">
-        <div style={{ width: '200px' }}>
-          <Select
-            id="grade-filter"
-            options={GRADE_OPTIONS}
-            onChange={handleGradeChange}
-            value={GRADE_OPTIONS.find(option => option.value === selectedGrade)}
-            placeholder="Select Grade"
-          />
-        </div>
         <Table
           columns={StudentSelectColumns}
           data={data}
           onSearch={(term) => {
             setSearchTerm(term);
             setCurrentPage(1);
-            handleParamsChange(1, term, pageSize, selectedGrade);
+            handleParamsChange(1, term, pageSize);
           }}
           endpoint={ENDPOINT.STUDENT}
           isCreatable={false}
@@ -123,7 +99,7 @@ const StudentOptions = React.forwardRef<StudentOptionsRef, StudentOptionsProps>(
           currentPage={currentPage}
           onPageChange={(page: number) => {
             setCurrentPage(page);
-            handleParamsChange(page, searchTerm, pageSize, selectedGrade);
+            handleParamsChange(page, searchTerm, pageSize);
           }}
           onPageSizeChange={handlePageResize}
           totalPage={totalPages}

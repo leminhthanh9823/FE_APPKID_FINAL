@@ -8,8 +8,7 @@ import Table from "../components/Table";
 import { toast } from "react-toastify";
 import Pagination from "../components/Pagination";
 import { HistoryReadingColumns } from "@/utils/constants/columns/student/historyReadingColumn";
-import { CSSTransition } from "react-transition-group";
-import { COMPLETION_OPTIONS, PASSED_OPTIONS } from "@/utils/constants/options";
+import { COMPLETION_OPTIONS } from "@/utils/constants/options";
 import { useParams } from "react-router-dom";
 import Select from 'react-select';
 import NotifyModal from "@/components/ui/NotifyModal";
@@ -23,7 +22,6 @@ const DetailStudent: React.FC = () => {
   );
   const { id: studentId } = useParams<{ id: string }>();
   const [selectedCompletion, setSelectedCompletion] = useState<boolean | null>(null);
-  const [selectedPassed, setSelectedPassed] = useState<boolean | null>(null);
   const [showNotiModal, setShowNotiModal] = useState(false);
   const { data, error, totalRecords, setParams, totalPages } = useFetchHistoryReadingStudent<IHistoryReadingStudent>(
     `${ENDPOINT.STUDENT_READING}/history-reading`,
@@ -42,7 +40,6 @@ const DetailStudent: React.FC = () => {
     searchTerm?: string | null,
     pagesize?: number | null,
     isCompleted?: boolean | null,
-    isPassed?: boolean | null
   ) => {
     if (studentId) {
       setParams({
@@ -52,7 +49,6 @@ const DetailStudent: React.FC = () => {
         student_id: studentId || "",
         title: searchTerm,
         is_completed: isCompleted,
-        is_passed: isPassed,
       });
       if (error) {
         toast.error(error);
@@ -64,25 +60,17 @@ const DetailStudent: React.FC = () => {
     const newCompletion = selectedOption ? selectedOption.value : null;
     setSelectedCompletion(newCompletion);
     setCurrentPage(1);
-    handleParamsChange(1, searchTerm, pageSize, newCompletion, selectedPassed);
-  };
-
-  const handleIsPassedChange = (selectedOption: { value: boolean | null; label: string } | null) => {
-    const newPassed = selectedOption ? selectedOption.value : null;
-    setSelectedPassed(newPassed);
-    setCurrentPage(1);
-    handleParamsChange(1, searchTerm, pageSize, selectedCompletion, newPassed);
+    handleParamsChange(1, searchTerm, pageSize, newCompletion);
   };
 
   const handlePageResize = (newSize: number) => {
     localStorage.setItem(Constants.LOCAL_STORAGE_KEY + "-" + ENDPOINT.STUDENT_READING + '/history-reading', newSize.toString());
     setPageSize(newSize);
     setCurrentPage(1);
-    handleParamsChange(1, searchTerm, newSize, selectedCompletion, selectedPassed);
+    handleParamsChange(1, searchTerm, newSize, selectedCompletion);
   };
 
   const handleNotify = () => {
-    // Implement notification logic here
     setShowNotiModal(true);
   };
 
@@ -132,15 +120,6 @@ const DetailStudent: React.FC = () => {
                     placeholder="Select Grade"
                   />
                 </div>
-                <div style={{ width: '200px' }}>
-                  <Select
-                    id="status-filter"
-                    options={PASSED_OPTIONS}
-                    onChange={handleIsPassedChange}
-                    value={PASSED_OPTIONS.find(option => option.value === selectedPassed)}
-                    placeholder="Select Status"
-                  />
-                </div>
               </div>
             }
             columns={HistoryReadingColumns}
@@ -148,7 +127,7 @@ const DetailStudent: React.FC = () => {
              onSearch={(searchTerm: string) => {
               setSearchTerm(searchTerm);
               setCurrentPage(1);
-              handleParamsChange(1, searchTerm, pageSize, selectedCompletion, selectedPassed,);
+              handleParamsChange(1, searchTerm, pageSize, selectedCompletion);
             }}
             endpoint={ENDPOINT.STUDENT}
             isCreatable={false}
@@ -168,7 +147,7 @@ const DetailStudent: React.FC = () => {
             currentPage={currentPage}
             onPageChange={(page: number) => {
               setCurrentPage(page);
-              handleParamsChange(page, searchTerm, pageSize, selectedCompletion,selectedPassed);
+              handleParamsChange(page, searchTerm, pageSize, selectedCompletion);
             }}
             onPageSizeChange={handlePageResize}
             totalPage={totalPages}

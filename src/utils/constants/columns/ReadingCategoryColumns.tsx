@@ -1,7 +1,6 @@
 import React from 'react';
 import defaultImage from '@/assets/engkid_logo.png';
 import TruncatedText from '@/components/ui/TruncatedText';
-import { getGradeText } from './readingCategoryReportColumns';
 
 interface Column {
   key: string;
@@ -40,24 +39,6 @@ export const ReadingCategoryColumns: Column[] = [
     label: 'Description',
     format: (value: string) => (
       <TruncatedText text={value} maxLength={40} maxWidth="200px" />
-    ),
-  },
-  {
-    key: 'grade_id',
-    label: 'Grade',
-    format: (value: number) => (
-      <span
-        style={{
-          backgroundColor: '#28a745',
-          color: 'white',
-          padding: '2px 8px',
-          borderRadius: '10px',
-          fontSize: '12px',
-          fontWeight: 'bold',
-        }}
-      >
-        {getGradeText(value)}
-      </span>
     ),
   },
   {

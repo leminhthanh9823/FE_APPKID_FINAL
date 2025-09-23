@@ -4,6 +4,6 @@ export interface ICreateNotificationRequest {
   type_target: number;
   is_active: boolean;
   send_date: Date | null;
-  grades: number[] | null;
+  parents: number[] | null;
   students: number[] | null;
 }

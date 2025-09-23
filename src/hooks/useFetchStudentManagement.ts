@@ -9,7 +9,6 @@ interface FetchParams {
   pageSize?: number | null;
   sorts?: string | null;
   searchTerm?: string | null;
-  grade_id?: number | null;
 }
 
 interface ApiResponse<T> {

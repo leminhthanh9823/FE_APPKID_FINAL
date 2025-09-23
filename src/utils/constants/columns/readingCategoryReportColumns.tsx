@@ -8,18 +8,6 @@ interface Column {
   format?: (value: any, row?: any) => React.ReactNode;
 }
 
-// Grade mapping để hiển thị grade_id thành text
-export const getGradeText = (gradeId: number): string => {
-  const gradeMap: { [key: number]: string } = {
-    1: 'Grade 1',
-    2: 'Grade 2',
-    3: 'Grade 3',
-    4: 'Grade 4',
-    5: 'Grade 5',
-  };
-  return gradeMap[gradeId] || `Grade ${gradeId}`;
-};
-
 export const ReadingCategoryReportColumns: Column[] = [
   {
     key: 'id',
@@ -55,24 +43,6 @@ export const ReadingCategoryReportColumns: Column[] = [
     label: 'Description',
     format: (value: string) => (
       <TruncatedText text={value} maxLength={40} maxWidth="220px" />
-    ),
-  },
-  {
-    key: 'grade_id',
-    label: 'Grade',
-    format: (value: number) => (
-      <span
-        style={{
-          backgroundColor: '#28a745',
-          color: 'white',
-          padding: '2px 8px',
-          borderRadius: '10px',
-          fontSize: '12px',
-          fontWeight: 'bold',
-        }}
-      >
-        {getGradeText(value)}
-      </span>
     ),
   },
   {

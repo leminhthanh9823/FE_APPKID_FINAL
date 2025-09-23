@@ -1,5 +1,5 @@
 import Field from '../../../types/field';
-import { GRADE_UC_OPTIONS, STATUS_UC_OPTIONS } from '../options';
+import { STATUS_UC_OPTIONS } from '../options';
 export const ReadingCreateFields: Field[] = [
   {
     name: 'title',
@@ -10,12 +10,11 @@ export const ReadingCreateFields: Field[] = [
     isRequired: true,
     colSpan: 12,
   },
-
   {
-    name: 'categories',
-    label: 'Categories',
-    type: 'multi-select',
-    value: [],
+    name: 'category_id',
+    label: 'Category',
+    type: 'select',
+    value: null,
     isRequired: true,
     colSpan: 12,
     rowGroup: '1',
@@ -41,29 +40,13 @@ export const ReadingCreateFields: Field[] = [
   },
   {
     name: 'is_active',
-    label: 'Active?',
+    label: 'Status',
     isRequired: true,
     type: 'select',
     value: STATUS_UC_OPTIONS[0].value,
     rowGroup: '3',
     colSpan: 6,
     options: STATUS_UC_OPTIONS,
-  },
-  {
-    name: 'is_send_notify',
-    label: 'Send notification?',
-    type: 'checkbox',
-    value: true,
-    rowGroup: '4',
-    colSpan: 12,
-  },
-  {
-    name: 'description_notify',
-    label: 'Description Notification',
-    type: 'textarea',
-    value: 'Một bài học hấp dẫn đã xuất hiện, các bé hãy khám phá ngay nhé!',
-    rowGroup: '5',
-    colSpan: 12,
   },
   {
     name: 'file',

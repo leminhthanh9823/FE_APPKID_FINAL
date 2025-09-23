@@ -34,32 +34,11 @@ export const ReadingColumns: Column[] = [
     ),
   },
   {
-    key: 'categories',
+    key: 'category_title',
     label: 'Category',
     format: (value: any) => {
-      let displayText = 'N/A';
-      if (value) {
-        if (Array.isArray(value)) {
-          displayText = value.map((v) => v.title).join(', ');
-        } else {
-          displayText = typeof value === 'object' ? value.title : value;
-        }
-      }
-      return (
-       <TruncatedText text={displayText} maxLength={210} maxWidth="300px" />
-      );
+      return value || 'N/A';
     },
-  },
-  {
-    key: 'grades',
-    label: 'Grades',
-        format: (value: any) => {
-          if (Array.isArray(value) && value.length > 0) {
-            const sorted = value.slice().sort((a, b) => a - b);
-            return sorted.join(', ');
-          }
-          return 'N/A';
-        },
   },
   {
     key: 'is_active',

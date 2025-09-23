@@ -1,15 +1,10 @@
-import { IGetEditNotificationResponse } from "@/diagram/response/notification/getEditNotification.response";
 import useFetchDetailNotification from "@/hooks/notification/useFetchDetailNotification";
-import useFetchItem from "@/hooks/useFetchItem";
 import { ENDPOINT } from "@/routers/endpoint";
 import { ROUTES } from "@/routers/routes";
-import { VIETNAM_TIMEZONE_OFFSET_HOURS } from "@/utils/constants/constants";
-import { STATUS_UC_OPTIONS, TYPE_NOTIFY_UC_OPTIONS, TYPE_TARGET_OPTIONS } from "@/utils/constants/options";
-import { buildRoute } from "@/utils/helper/routeHelper";
-import { useEffect, useState, useRef } from "react";
+import { STATUS_UC_OPTIONS, TYPE_TARGET_OPTIONS } from "@/utils/constants/options";
+import { useRef } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import GradeOptions, { GradeOptionsRef } from "./type-notification-component/GradeOptions";
 import StudentOptions, { StudentOptionsRef } from "./type-notification-component/StudentOptions";
 import usePutItemJson from "@/hooks/usePutItemJson";
 
@@ -17,7 +12,6 @@ const EditNotification: React.FC = () => {
   const { id: notification_id } = useParams<{ id: string }>();
   const { data, setData, minDateTime, setMinDateTime } = useFetchDetailNotification(`${ENDPOINT.NOTIFY}/cms/get-by-id`, { id: notification_id });
   const { saveChanges } = usePutItemJson(`${ENDPOINT.NOTIFY}/cms/update-by-id`);
-  const gradeRef = useRef<GradeOptionsRef>(null);
   const studentRef = useRef<StudentOptionsRef>(null);
 
   const handleInputChange = (name: string, value: any) => {
@@ -71,10 +65,11 @@ const EditNotification: React.FC = () => {
       return;
     }
     let payload;
-    if(data.type_target === 1 && gradeRef.current?.validate()) {
-      toast.error("Please select at least one grade.");
-    }
-    else if(data.type_target === 2 && studentRef.current?.validate()) {
+    //Sửa thành chọn parents
+    // if(data.type_target === 1 && gradeRef.current?.validate()) {
+    //   toast.error("Please select at least one grade.");
+    // }
+    if(data.type_target === 2 && studentRef.current?.validate()) {
       toast.error("Please select at least one student.");
     }
     payload = {
@@ -170,6 +165,8 @@ const EditNotification: React.FC = () => {
             </select>
           </div>
 
+           {/* 
+          Sửa thành chọn parents
            {
             data?.type_target === 1 && (
              <GradeOptions
@@ -177,7 +174,7 @@ const EditNotification: React.FC = () => {
                 onChange={(grades) => handleInputChange("grades", grades)}
              />
             )
-          }
+          } */}
 
           {
             data?.type_target === 2 && (

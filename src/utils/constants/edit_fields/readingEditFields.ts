@@ -1,5 +1,5 @@
 import Field from '../../../types/field';
-import { GRADE_UC_OPTIONS, STATUS_UC_OPTIONS } from '../options';
+import { STATUS_UC_OPTIONS } from '../options';
 
 export const ReadingEditFields: Field[] = [
   {
@@ -12,10 +12,10 @@ export const ReadingEditFields: Field[] = [
     colSpan: 12,
   },
   {
-    name: 'categories',
-    label: 'Categories',
-    type: 'multi-select',
-    value: [],
+    name: 'category',
+    label: 'Category',
+    type: 'select',
+    value: null,
     isRequired: true,
     colSpan: 12,
     rowGroup: '1',
@@ -47,7 +47,7 @@ export const ReadingEditFields: Field[] = [
     value: '',
     isRequired: true,
     rowGroup: '4',
-    colSpan: 6,
+    colSpan: 12,
     options: STATUS_UC_OPTIONS,
   },
   {
