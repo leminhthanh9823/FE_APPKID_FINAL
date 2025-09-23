@@ -39,6 +39,22 @@ export const ReadingCreateFields: Field[] = [
     colSpan: 12,
   },
   {
+    name: 'difficulty_level',
+    label: 'Difficulty Level',
+    type: 'select',
+    value: 1,
+    isRequired: true,
+    colSpan: 12,
+    rowGroup: '3',
+    options: [
+      { value: 1, label: '1' },
+      { value: 2, label: '2' },
+      { value: 3, label: '3' },
+      { value: 4, label: '4' },
+      { value: 5, label: '5' },
+    ],
+  },
+  {
     name: 'is_active',
     label: 'Status',
     isRequired: true,
