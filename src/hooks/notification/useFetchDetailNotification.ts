@@ -62,7 +62,7 @@ const useFetchDetailNotification = <T,>(endpoint: string, initialReq: T): IUseFe
       if(data.notify_target[0].is_to_all_parents == 1){
         return 0;
       }
-      else if (data.notify_target[0].grade_id != null){
+      else if (data.notify_target[0].parent_id != null){
         return 1;
       }
       else if(data.notify_target[0].student_id != null){
@@ -80,8 +80,8 @@ const useFetchDetailNotification = <T,>(endpoint: string, initialReq: T): IUseFe
       type_target: type_target,
       send_date: data.send_date,
       is_active: data.is_active,
-      grades: type_target == 1 ? data.notify_target && Array.isArray(data.notify_target) && data.notify_target.map((item: any) => item.grade_id) || [] : [],
-      students: type_target == 2 ? data.notify_target && Array.isArray(data.notify_target) && data.notify_target.map((item: any) => item.student_id) || [] : []
+      parents: type_target == 1 ? data.notify_target && Array.isArray(data.notify_target) && data.notify_target.map((item: any) => item.parent_id) || [] : [],
+      students: type_target == 2 ? data.notify_target && Array.isArray(data.notify_target) && data.notify_target.map((item: any) => item.student_id) || [] : [],
     };
   };
 

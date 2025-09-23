@@ -6,6 +6,6 @@ export interface IGetEditNotificationResponse {
   type_target: number;
   is_active: number;
   send_date: Date | null;
-  grades: number[] | null;
   students: number[] | null;
+  parents: number[] | null;
 }

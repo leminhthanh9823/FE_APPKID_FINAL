@@ -29,6 +29,7 @@ export const ENDPOINT = {
   LEARNING_PATH_ADD_ITEMS: '/learning-path/:pathId/add-items',
   LEARNING_PATH_REORDER_CATEGORIES: '/learning-path/:pathId/categories/reorder',
   LEARNING_PATH_REORDER_ITEMS: '/learning-path/:pathId/categories/:categoryId/items/reorder',
+  PARENT: '/parent',
 
   // Reading category and available readings APIs
   READING_CATEGORY_LIST: '/reading-category/get-list-no-filter',

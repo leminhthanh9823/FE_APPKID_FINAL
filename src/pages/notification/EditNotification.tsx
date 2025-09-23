@@ -6,9 +6,11 @@ import { useRef } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import StudentOptions, { StudentOptionsRef } from "./type-notification-component/StudentOptions";
+import ParentOptions, { ParentOptionsRef } from "./type-notification-component/ParentOptions";
 import usePutItemJson from "@/hooks/usePutItemJson";
 
 const EditNotification: React.FC = () => {
+  const parentRef = useRef<ParentOptionsRef>(null);
   const { id: notification_id } = useParams<{ id: string }>();
   const { data, setData, minDateTime, setMinDateTime } = useFetchDetailNotification(`${ENDPOINT.NOTIFY}/cms/get-by-id`, { id: notification_id });
   const { saveChanges } = usePutItemJson(`${ENDPOINT.NOTIFY}/cms/update-by-id`);
@@ -18,7 +20,23 @@ const EditNotification: React.FC = () => {
     setData((prev) => prev ? { ...prev, [name]: value } : prev);
   };
 
-  const onSelectRow = (row: any) => {
+
+
+  const onSelectParentRow = (row: any) => {
+    setData((prev) => {
+      if (prev) {
+        const parents = prev.parents || [];
+        const isSelected = parents.includes(row.id);
+        return {
+          ...prev,
+          parents: isSelected ? parents.filter((parentId: number) => parentId !== row.id) : [...parents, row.id],
+        };
+      }
+      return prev;
+    });
+  };
+
+  const onSelectStudentRow = (row: any) => {
     setData((prev) => {
       if (prev) {
         const students = prev.students || [];
@@ -32,7 +50,20 @@ const EditNotification: React.FC = () => {
     });
   };
 
-  const handleClearSelection = () => {
+
+  const handleClearParentSelection = () => {
+    setData((prev) => {
+      if (prev) {
+        return {
+          ...prev,
+          parents: [],
+        };
+      }
+      return prev;
+    });
+  }
+
+  const handleClearStudentSelection = () => {
     setData((prev) => {
       if (prev) {
         return {
@@ -74,7 +105,7 @@ const EditNotification: React.FC = () => {
     }
     payload = {
       ...data,
-      grades: data.type_target === 1 ? data.grades : null,
+      parents: data.type_target === 1 ? data.parents : null,
       students: data.type_target === 2 ? data.students : null,
     }
 
@@ -165,23 +196,24 @@ const EditNotification: React.FC = () => {
             </select>
           </div>
 
-           {/* 
-          Sửa thành chọn parents
-           {
+
+          {
             data?.type_target === 1 && (
-             <GradeOptions
-                grades={data.grades}
-                onChange={(grades) => handleInputChange("grades", grades)}
-             />
+              <ParentOptions
+                parents={data.parents || []}
+                onSelectRow={onSelectParentRow}
+                handleClearSelection={handleClearParentSelection}
+                ref={parentRef}
+              />
             )
-          } */}
+          }
 
           {
             data?.type_target === 2 && (
               <StudentOptions
                 students={data.students || []}
-                onSelectRow={(row: any) => onSelectRow(row)}
-                handleClearSelection={handleClearSelection}
+                onSelectRow={onSelectStudentRow}
+                handleClearSelection={handleClearStudentSelection}
               />
             )
           }
