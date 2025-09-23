@@ -37,7 +37,7 @@ const GamesPage: React.FC = () => {
   const handleEditGame = (game: Game) => {
     // Use absolute path to avoid appending to current URL
     if (game.prerequisite_reading_id) {
-      navigate(`/reading/${game.prerequisite_reading_id}/games/${game.id}/edit`);
+      navigate(`/kid-reading/${game.prerequisite_reading_id}/games/${game.id}/edit`);
     } else {
       navigate(`/games/${game.id}/edit`);
     }

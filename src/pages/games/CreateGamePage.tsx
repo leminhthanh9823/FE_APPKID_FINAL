@@ -52,9 +52,9 @@ const CreateGamePage: React.FC = () => {
       message.success('Game created successfully');
       // Navigate to games list in reading after creation
       if (readingId) {
-        navigate(`/reading/${readingId}/games`);
+        navigate(`/kid-reading/${readingId}/games`);
       } else {
-        navigate('/games');
+        navigate('/kid-reading');
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -166,9 +166,9 @@ const CreateGamePage: React.FC = () => {
                 onClick={() => {
                   // Navigate back to games view without assigning words
                   if (readingId) {
-                    navigate(`/reading/${readingId}/games`);
+                    navigate(`/kid-reading/${readingId}/games`);
                   } else {
-                    navigate('/games');
+                    navigate('/kid-reading');
                   }
                 }}
               >
