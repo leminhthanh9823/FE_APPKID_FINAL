@@ -86,7 +86,7 @@ const GamesPage: React.FC = () => {
             </li>
             {readingId && (
               <li className="breadcrumb-item">
-                <a href="/reading">Reading</a>
+                <a href="/kid-reading">Reading</a>
               </li>
             )}
             <li className="breadcrumb-item active">{pageTitle}</li>
