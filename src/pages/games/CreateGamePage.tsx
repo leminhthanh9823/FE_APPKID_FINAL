@@ -114,7 +114,7 @@ const CreateGamePage: React.FC = () => {
         message.success('Words assigned successfully');
         // Navigate back to appropriate games view
         if (readingId) {
-          navigate(`/reading/${readingId}/games`);
+          navigate(`/kid-reading/${readingId}/games`);
         } else {
           navigate('/games');
         }

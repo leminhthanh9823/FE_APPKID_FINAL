@@ -58,9 +58,9 @@ export const ROUTES = {
   
   // Game Management Routes
   GAMES: '/games',
-  GAMES_BY_READING: '/reading/:id/games',
-  CREATE_GAME: '/reading/:id/games/create',
-  EDIT_GAME: '/reading/:id/games/:gameId/edit',
+  GAMES_BY_READING: '/kid-reading/:id/games',
+  CREATE_GAME: '/kid-reading/:id/games/create',
+  EDIT_GAME: '/kid-reading/:id/games/:gameId/edit',
   EDIT_GAME_GENERAL: '/games/:gameId/edit',
 
   // Word Management Routes

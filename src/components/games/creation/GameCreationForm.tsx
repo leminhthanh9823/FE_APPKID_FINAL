@@ -2,6 +2,7 @@ import { Form, Input, Select, Button, Card, Upload, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import type { UploadProps } from 'antd';
+import { GAME_TYPES } from '@/utils/constants/options';
 
 const { TextArea } = Input;
 
@@ -16,13 +17,6 @@ interface GameCreationFormProps {
   onSubmit: (gameData: GameFormData) => void;
   initialValues?: Partial<GameFormData>;
 }
-
-const gameTypes = [
-  { value: 1, label: 'Word Match' },
-  { value: 2, label: 'Word Order' },
-  { value: 3, label: 'Memory Game' },
-  { value: 4, label: 'Spelling Game' },
-];
 
 export const GameCreationForm: React.FC<GameCreationFormProps> = ({
   onSubmit,
@@ -79,7 +73,7 @@ export const GameCreationForm: React.FC<GameCreationFormProps> = ({
               value={selectedGameType}
               onChange={(value: number) => setSelectedGameType(value)}
             >
-              {gameTypes.map((type) => (
+              {GAME_TYPES.map((type) => (
                 <Select.Option key={type.value} value={type.value}>
                   {type.label}
                 </Select.Option>
@@ -107,9 +101,9 @@ export const GameCreationForm: React.FC<GameCreationFormProps> = ({
                 if (!isJpgOrPng) {
                   message.error('You can only upload JPG/PNG/GIF files!');
                 }
-                const isLt2M = file.size / 1024 / 1024 < 2;
-                if (!isLt2M) {
-                  message.error('Image must smaller than 2MB!');
+                const isLt5M = file.size / 1024 / 1024 < 5;
+                if (!isLt5M) {
+                  message.error('Image must smaller than 5MB!');
                 }
                 return false; // Prevent auto upload
               }}

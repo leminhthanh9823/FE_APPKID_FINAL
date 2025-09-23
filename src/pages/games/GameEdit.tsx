@@ -4,15 +4,9 @@ import { Form, Input, Select, Switch, Card, Table, Button, Spin, message, Upload
 import { UploadOutlined } from '@ant-design/icons';
 import useGameEdit from '../../hooks/useGameEdit';
 import AssignWordsModal from '../../components/games/words/AssignWordsModal';
+import { GAME_TYPES } from '@/utils/constants/options';
 
 const { TextArea } = Input;
-
-const gameTypes = [
-  { value: 1, label: 'Word Match' },
-  { value: 2, label: 'Word Order' },
-  { value: 3, label: 'Memory Game' },
-  { value: 4, label: 'Spelling Game' },
-];
 
 const GameEdit: React.FC = () => {
   const { id: readingId, gameId } = useParams();
@@ -84,7 +78,7 @@ const GameEdit: React.FC = () => {
       key: 'type',
       width: 120,
       render: (type: number) => {
-        const gameType = gameTypes.find(gt => gt.value === type);
+        const gameType = GAME_TYPES.find(gt => gt.value === type);
         return gameType ? gameType.label : `Type: ${type}`;
       }
     },
@@ -119,7 +113,7 @@ const GameEdit: React.FC = () => {
               <a href={`/kid-reading`}>Reading Management</a>
             </li>
             <li className="breadcrumb-item">
-              <a href={readingId ? `/reading/${readingId}/games` : '/games'}>
+              <a href={readingId ? `/kid-reading/${readingId}/games` : '/games'}>
                 {readingId ? 'View Game' : 'Games'}
               </a>
             </li>
@@ -157,7 +151,7 @@ const GameEdit: React.FC = () => {
               name="type"
               label="Game Type *"
             >
-              <Select options={gameTypes} />
+              <Select options={GAME_TYPES} />
             </Form.Item>
 
             <Form.Item
@@ -187,9 +181,9 @@ const GameEdit: React.FC = () => {
                   if (!isJpgOrPng) {
                     message.error('You can only upload JPG/PNG/GIF files!');
                   }
-                  const isLt2M = file.size / 1024 / 1024 < 2;
-                  if (!isLt2M) {
-                    message.error('Image must smaller than 2MB!');
+                  const isLt5M = file.size / 1024 / 1024 < 5;
+                  if (!isLt5M) {
+                    message.error('Image must smaller than 5MB!');
                   }
                   return false;
                 }}
