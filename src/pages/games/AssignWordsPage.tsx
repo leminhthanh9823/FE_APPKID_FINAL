@@ -440,7 +440,7 @@ const AssignWordsPage: React.FC = () => {
       await updateGameWords(allAssignments);
       message.success('Words assigned successfully');
       if (currentReadingId) {
-        navigate(`/reading/${currentReadingId}/games/${gameId}/edit`);
+        navigate(`/kid-reading/${currentReadingId}/games/${gameId}/edit`);
       } else {
         navigate('/games');
       }
@@ -616,7 +616,7 @@ const AssignWordsPage: React.FC = () => {
             <Button 
               onClick={() => {
                 if (currentReadingId) {
-                  navigate(`/reading/${currentReadingId}/games/${gameId}/edit`);
+                  navigate(`/kid-reading/${currentReadingId}/games/${gameId}/edit`);
                 } else {
                   navigate('/games');
                 }
