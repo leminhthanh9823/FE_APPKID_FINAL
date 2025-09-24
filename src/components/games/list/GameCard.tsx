@@ -137,7 +137,7 @@ const GameCard: React.FC<GameCardProps> = ({
     } as const,
     {
       key: 'delete',
-      label: 'Delete',
+      label: 'Remove',
       danger: true,
       onClick: () => onDelete(game.id),
     } as const,

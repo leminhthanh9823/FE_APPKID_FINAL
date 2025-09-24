@@ -1,5 +1,5 @@
 import Field from '../../../types/field';
-import { STATUS_UC_OPTIONS } from '../options';
+import { DIFFICULTY_OPTIONS_UC, STATUS_UC_OPTIONS } from '../options';
 export const ReadingCreateFields: Field[] = [
   {
     name: 'title',
@@ -39,13 +39,23 @@ export const ReadingCreateFields: Field[] = [
     colSpan: 12,
   },
   {
+    name: 'difficulty_level',
+    label: 'Difficulty Level',
+    type: 'select',
+    value: 1,
+    isRequired: true,
+    colSpan: 12,
+    rowGroup: '3',
+    options: DIFFICULTY_OPTIONS_UC,
+  },
+  {
     name: 'is_active',
     label: 'Status',
     isRequired: true,
     type: 'select',
     value: STATUS_UC_OPTIONS[0].value,
-    rowGroup: '3',
-    colSpan: 6,
+    rowGroup: '4',
+    colSpan: 12,
     options: STATUS_UC_OPTIONS,
   },
   {
@@ -54,7 +64,7 @@ export const ReadingCreateFields: Field[] = [
     type: 'file',
     isRequired: true,
     value: '',
-    rowGroup: '6',
+    rowGroup: '5',
     colSpan: 12,
     fileAccept: 'video/*',
   },
@@ -63,7 +73,7 @@ export const ReadingCreateFields: Field[] = [
     label: 'Image',
     type: 'file',
     value: '',
-    rowGroup: '7',
+    rowGroup: '6',
     isRequired: true,
     colSpan: 12,
   },

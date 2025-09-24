@@ -59,4 +59,14 @@ export const ReadingColumns: Column[] = [
       </span>
     ),
   },
+  {
+    key: 'difficulty_level',
+    label: 'Difficulty',
+    format: (value: any) => {
+      if (typeof value === 'number') {
+        return `Level ${value}`;
+      }
+      return 'N/A';
+    },
+  },
 ];
