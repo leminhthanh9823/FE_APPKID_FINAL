@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { Card, message } from 'antd';
+import { Card } from 'antd';
+import { toast } from 'react-toastify';
 import { GameProvider } from '../../stores/contexts/GameContext';
 import GameList from '../../components/games/list/GameList';
 import useGameManagement from '../../hooks/useGameManagement';
@@ -21,7 +22,7 @@ const GamesPage: React.FC = () => {
 
   useEffect(() => {
     if (error) {
-      message.error(error);
+      toast.error(error);
     }
   }, [error]);
 
@@ -46,18 +47,18 @@ const GamesPage: React.FC = () => {
   const handleDeleteGame = async (gameId: number) => {
     try {
       await deleteGame(gameId);
-      message.success('Game deleted successfully');
+      toast.success('Game deleted successfully');
     } catch (error) {
-      message.error('Failed to delete game');
+      toast.error('Failed to delete game');
     }
   };
 
   const handleStatusChange = async (gameId: number, status: GameStatus) => {
     try {
       await changeGameStatus(gameId, status);
-      message.success('Game status updated successfully');
+      toast.success('Game status updated successfully');
     } catch (error) {
-      message.error('Failed to update game status');
+      toast.error('Failed to update game status');
     }
   };
 
@@ -65,7 +66,7 @@ const GamesPage: React.FC = () => {
     try {
       await reorderGames(reorderedGames);
     } catch (error) {
-      message.error('Failed to reorder games');
+      toast.error('Failed to reorder games');
     }
   };
 
@@ -83,11 +84,9 @@ const GamesPage: React.FC = () => {
             <li className="breadcrumb-item">
               <a href="/dashboard">CMS</a>
             </li>
-            {readingId && (
-              <li className="breadcrumb-item">
-                <a href="/kid-reading">Reading</a>
+            <li className="breadcrumb-item">
+                <a href="/kid-reading">Reading Management</a>
               </li>
-            )}
             <li className="breadcrumb-item active">{pageTitle}</li>
           </ol>
         </nav>

@@ -4,6 +4,7 @@ import { message } from 'antd';
 import { Game } from '../types/game';
 import { Word, GameWord } from '../types/word';
 import { ApiResponse } from '../types/api';
+import { toast } from 'react-toastify';
 
 interface WordsResponse {
   words: Word[];
@@ -53,12 +54,12 @@ export const useGameEdit = (gameId: string) => {
           setGameWords(gameData.words);
         }
       } else {
-        message.error('Failed to load game details');
+        toast.error('Failed to load game details');
         setGame(null);
       }
     } catch (error) {
       console.error('Failed to load game:', error);
-      message.error('Failed to load game details');
+      toast.error('Failed to load game details');
       setGame(null);
     }
   };
@@ -76,7 +77,7 @@ export const useGameEdit = (gameId: string) => {
       }
     } catch (error) {
       console.error('Failed to load words:', error);
-      message.error('Failed to load words');
+      toast.error('Failed to load words');
       setAllWords([]);
     }
   };
@@ -129,11 +130,11 @@ export const useGameEdit = (gameId: string) => {
       
       if (response.data.success) {
         setGame(response.data.data);
-        message.success('Game updated successfully');
+        toast.success('Game updated successfully');
       }
     } catch (error) {
       console.error('Failed to update game:', error);
-      message.error('Failed to update game');
+      toast.error('Failed to update game');
     } finally {
       setLoading(false);
     }
@@ -161,11 +162,11 @@ export const useGameEdit = (gameId: string) => {
       
       if (response.data.success) {
         await fetchGameWords();
-        message.success('Words updated successfully');
+        toast.success('Words updated successfully');
       }
     } catch (error) {
       console.error('Failed to update words:', error);
-      message.error('Failed to update words');
+      toast.error('Failed to update words');
     } finally {
       setLoading(false);
     }
@@ -183,7 +184,7 @@ export const useGameEdit = (gameId: string) => {
             fetchGameWords()
           ]);
         } catch (error) {
-          message.error('Failed to load data');
+          toast.error('Failed to load data');
         } finally {
           setLoading(false);
         }

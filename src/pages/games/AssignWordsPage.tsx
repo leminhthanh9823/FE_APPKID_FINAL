@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Button, Input, Tabs, Space, Tag, message, Spin, Modal, Form, Select, Upload } from 'antd';
+import { Card, Button, Input, Tabs, Space, Tag, Spin, Modal, Form, Select, Upload } from 'antd';
+import { toast } from 'react-toastify';
 import { SearchOutlined, PlusOutlined, UploadOutlined, EditOutlined } from '@ant-design/icons';
 import useGameEdit from '../../hooks/useGameEdit';
 import { Word, getWordTypeName } from '../../types/word';
@@ -438,14 +439,14 @@ const AssignWordsPage: React.FC = () => {
       });
 
       await updateGameWords(allAssignments);
-      message.success('Words assigned successfully');
+  toast.success('Words assigned successfully');
       if (currentReadingId) {
         navigate(`/kid-reading/${currentReadingId}/games/${gameId}/edit`);
       } else {
         navigate('/games');
       }
     } catch (error) {
-      message.error('Failed to assign words');
+      toast.error('Failed to assign words');
       console.error('Save error:', error);
     }
   };
@@ -476,11 +477,12 @@ const AssignWordsPage: React.FC = () => {
             {currentReadingId ? (
               <>
                 <li className="breadcrumb-item"><a href={`/kid-reading`}>Reading Management</a></li>
-                <li className="breadcrumb-item"><a href={`/reading/${currentReadingId}/games`}>View Game</a></li>
+                <li className="breadcrumb-item"><a href={`/kid-reading/${currentReadingId}/games`}>Reading Games</a></li>
               </>
             ) : (
               <li className="breadcrumb-item"><a href="/games">Games</a></li>
             )}
+            <li className="breadcrumb-item"><a href={`/games/${gameId}/edit`}>Edit Game</a></li>
             <li className="breadcrumb-item active">Assign Words</li>
           </ol>
         </nav>
@@ -555,7 +557,6 @@ const AssignWordsPage: React.FC = () => {
                             <p style={{ fontSize: '16px', marginBottom: '8px' }}>No available words found</p>
                             {allWords.length === 0 && (
                               <p style={{ fontSize: '12px', color: '#bfbfbf' }}>
-                                Debug: Total words loaded = {allWords.length}
                               </p>
                             )}
                           </div>
@@ -592,7 +593,6 @@ const AssignWordsPage: React.FC = () => {
                             </p>
                             {gameWords.length === 0 && (
                               <p style={{ fontSize: '12px', color: '#bfbfbf', marginTop: '8px' }}>
-                                Debug: Game words loaded = {gameWords.length}
                               </p>
                             )}
                           </div>
@@ -667,7 +667,7 @@ const AssignWordsPage: React.FC = () => {
               }
 
               const newWord = await createWord(formData);
-              message.success('Word created successfully');
+              toast.success('Word created successfully');
               setIsCreateModalVisible(false);
               form.resetFields();
               
@@ -684,7 +684,7 @@ const AssignWordsPage: React.FC = () => {
                 }
               }
             } catch (error) {
-              message.error('Failed to create word');
+              toast.error('Failed to create word');
             }
           }}
         >
@@ -787,7 +787,8 @@ const AssignWordsPage: React.FC = () => {
               }
 
               const updatedWord = await editWord(editingWord.id, formData);
-              message.success('Word updated successfully');
+              toast.success('Word updated successfully');
+              window.location.reload();
               
               // Update the word in local state
               const updateWordInState = (words: Word[]) => {
@@ -815,7 +816,7 @@ const AssignWordsPage: React.FC = () => {
               setEditingWord(null);
               editForm.resetFields();
             } catch (error) {
-              message.error('Failed to update word');
+              toast.error('Failed to update word');
             }
           }}
         >

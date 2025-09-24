@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { message } from 'antd';
 import { wordAssignmentService } from '../services/wordAssignment';
+import { toast } from 'react-toastify';
 
 interface WordAssignment {
   wordId: number;
@@ -24,12 +25,12 @@ export const useAssignWords = () => {
 
       const result = await wordAssignmentService.assignWordsToGame(gameId, formattedAssignments);
       
-      message.success('Words assigned to game successfully!');
+      toast.success('Words assigned to game successfully!');
       return result;
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to assign words to game';
       setError(errorMessage);
-      message.error(errorMessage);
+      toast.error(errorMessage);
       throw err;
     } finally {
       setLoading(false);
@@ -42,12 +43,12 @@ export const useAssignWords = () => {
 
     try {
       const result = await wordAssignmentService.removeWordsFromGame(gameId);
-      message.success('Words removed from game successfully!');
+      toast.success('Words removed from game successfully!');
       return result;
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to remove words from game';
       setError(errorMessage);
-      message.error(errorMessage);
+      toast.error(errorMessage);
       throw err;
     } finally {
       setLoading(false);

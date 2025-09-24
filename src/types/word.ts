@@ -3,6 +3,7 @@ export enum WordType {
   Verb = 2,
   Adjective = 3,
   Adverb = 4,
+  Preposition = 5,
 }
 
 export interface Word {
@@ -51,6 +52,8 @@ export function getWordTypeName(type: WordType): string {
       return 'Adjective';
     case WordType.Adverb:
       return 'Adverb';
+    case WordType.Preposition:
+      return 'Preposition';
     default:
       return 'Unknown';
   }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Card, message, Spin } from 'antd';
+import { Card, Spin } from 'antd';
+import { toast } from 'react-toastify';
 import { GameProvider } from '../../stores/contexts/GameContext';
 import GameCreationForm from '../../components/games/creation/GameCreationForm';
 import WordAssignmentPanel from '../../components/games/words/WordAssignmentPanel';
@@ -49,7 +50,7 @@ const CreateGamePage: React.FC = () => {
         readingId: parseInt(readingId || '0'),
         isActive: 1
       } as CreateGameDto);
-      message.success('Game created successfully');
+      toast.success('Game created successfully');
       // Navigate to games list in reading after creation
       if (readingId) {
         navigate(`/kid-reading/${readingId}/games`);
@@ -58,9 +59,9 @@ const CreateGamePage: React.FC = () => {
       }
     } catch (error) {
       if (error instanceof Error) {
-        message.error(error.message);
+        toast.error(error.message);
       } else {
-        message.error('Failed to create game');
+        toast.error('Failed to create game');
       }
     } finally {
       setLoading(false);
@@ -111,7 +112,7 @@ const CreateGamePage: React.FC = () => {
           words: wordAssignments
         });
         
-        message.success('Words assigned successfully');
+        toast.success('Words assigned successfully');
         // Navigate back to appropriate games view
         if (readingId) {
           navigate(`/kid-reading/${readingId}/games`);
@@ -120,9 +121,9 @@ const CreateGamePage: React.FC = () => {
         }
       } catch (error) {
         if (error instanceof Error) {
-          message.error(error.message);
+          toast.error(error.message);
         } else {
-          message.error('Failed to assign words to game');
+          toast.error('Failed to assign words to game');
         }
       } finally {
         setLoading(false);
@@ -140,6 +141,11 @@ const CreateGamePage: React.FC = () => {
               <a href="/dashboard">CMS</a>
             </li>
             <li className="breadcrumb-item"><a href={`/kid-reading`}>Reading Management</a></li>
+            {readingId && (
+              <li className="breadcrumb-item">
+                <a href={`/kid-reading/${readingId}/games`}>Reading Games</a>
+              </li>
+            )}
             <li className="breadcrumb-item active">
               {currentGame ? 'Assign Words' : 'Create New Game'}
             </li>

@@ -2,6 +2,7 @@ import { Modal, Form, Input, Select, message } from 'antd';
 import { useState } from 'react';
 import { Word, WordType } from '@/types/word';
 import apiClient from '@/apis/apiRequest';
+import { toast } from 'react-toastify';
 
 interface CreateWordRequest {
   word: string;
@@ -30,13 +31,13 @@ const WordCreationModal: React.FC<WordCreationModalProps> = ({
       setLoading(true);
       const response = await apiClient.post('/api/word', values);
       if (response.data) {
-        message.success('Word created successfully');
+        toast.success('Word created successfully');
         onSuccess(response.data);
         form.resetFields();
         onClose();
       }
     } catch (error) {
-      message.error('Failed to create word');
+      toast.error('Failed to create word');
     } finally {
       setLoading(false);
     }

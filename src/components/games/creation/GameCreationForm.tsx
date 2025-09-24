@@ -3,6 +3,7 @@ import { UploadOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import type { UploadProps } from 'antd';
 import { GAME_TYPES } from '@/utils/constants/options';
+import { toast } from 'react-toastify';
 
 const { TextArea } = Input;
 
@@ -99,11 +100,11 @@ export const GameCreationForm: React.FC<GameCreationFormProps> = ({
               beforeUpload={(file) => {
                 const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/gif';
                 if (!isJpgOrPng) {
-                  message.error('You can only upload JPG/PNG/GIF files!');
+                  toast.error('You can only upload JPG/PNG/GIF files!');
                 }
                 const isLt5M = file.size / 1024 / 1024 < 5;
                 if (!isLt5M) {
-                  message.error('Image must smaller than 5MB!');
+                  toast.error('Image must smaller than 5MB!');
                 }
                 return false; // Prevent auto upload
               }}

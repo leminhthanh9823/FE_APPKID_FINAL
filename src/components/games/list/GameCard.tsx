@@ -16,24 +16,30 @@ const StyledCard = styled(Card)<{ $isDragging?: boolean }>`
   box-shadow: ${props => props.$isDragging 
     ? '0 10px 30px rgba(0,0,0,0.3)' 
     : '0 2px 8px rgba(0,0,0,0.1)'};
-  
+  width: 320px;
+  min-width: 320px;
+  max-width: 320px;
+  height: 420px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  box-sizing: border-box;
   &:hover {
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    transform: ${props => props.$isDragging ? 'none' : 'translateY(-2px)'};
+    transform: none;
   }
-  
   .ant-card-body {
     padding: 16px;
   }
-  
   .game-image {
     width: 100%;
     height: 160px;
     object-fit: cover;
     border-radius: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 0;
+    display: block;
   }
-  
   .game-image-placeholder {
     width: 100%;
     height: 160px;
@@ -44,46 +50,58 @@ const StyledCard = styled(Card)<{ $isDragging?: boolean }>`
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-bottom: 12px;
     color: #8c8c8c;
-    
     .anticon {
       font-size: 32px;
       margin-bottom: 8px;
     }
   }
-  
   .hidden {
     display: none;
   }
-  
   .game-description {
     color: #666;
-    margin-bottom: 12px;
+    margin-bottom: 0;
     line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
   }
-  
+  .game-stats {
+    min-height: 56px;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+  }
+  .game-meta {
+    min-height: 32px;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
   .game-meta {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
     margin-bottom: 12px;
   }
-  
   .game-stats {
     background: #f8f9fa;
     border-radius: 6px;
     padding: 12px;
     margin-bottom: 12px;
-    
     .ant-statistic {
       text-align: center;
-      
       .ant-statistic-content {
         font-size: 16px;
         font-weight: 600;
       }
-      
       .ant-statistic-title {
         font-size: 12px;
         color: #666;
@@ -91,14 +109,12 @@ const StyledCard = styled(Card)<{ $isDragging?: boolean }>`
       }
     }
   }
-  
   .prerequisite-info {
     background: #e6f4ff;
     border: 1px solid #91caff;
     border-radius: 6px;
     padding: 8px;
     margin-bottom: 12px;
-    
     .prerequisite-title {
       font-size: 12px;
       color: #0958d9;
@@ -121,7 +137,7 @@ const GameCard: React.FC<GameCardProps> = ({
   };
 
   const getStatusText = (isActive: number) => {
-    return isActive ? 'Published' : 'Archived';
+    return isActive ? 'Active' : 'Inactive';
   };
 
   const getGameTypeName = (type: number) => {
@@ -157,40 +173,28 @@ const GameCard: React.FC<GameCardProps> = ({
         </Dropdown>
       }
     >
-      {game.image ? (
-        <img
-          src={game.image}
-          alt={game.name}
-          className="game-image"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
-            const placeholder = target.nextElementSibling as HTMLElement;
-            if (placeholder) {
-              placeholder.classList.remove('hidden');
-            }
-          }}
-        />
-      ) : null}
-      
-      <div className={`game-image-placeholder ${game.image ? 'hidden' : ''}`}>
-        <PictureOutlined />
-        <span>No Image</span>
-      </div>
-      
-      {game.description && (
-        <p className="game-description">{game.description}</p>
-      )}
-      
-      {game.prerequisiteReading && (
-        <div className="prerequisite-info">
-          <p className="prerequisite-title">
-            <ReadOutlined />
-            Reading: {game.prerequisiteReading.title}
-          </p>
+      <div style={{ position: 'relative', marginBottom: 12 }}>
+        {game.image ? (
+          <img
+            src={game.image}
+            alt={game.name}
+            className="game-image"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              const placeholder = target.nextElementSibling as HTMLElement;
+              if (placeholder) {
+                placeholder.classList.remove('hidden');
+              }
+            }}
+          />
+        ) : null}
+        <div className={`game-image-placeholder ${game.image ? 'hidden' : ''}`}>
+          <PictureOutlined />
+          <span>No Image</span>
         </div>
-      )}
-      
+      </div>
+      <p className="game-description">{game.description || ''}</p>
       <div className="game-stats">
         <Space split={<Divider type="vertical" />} style={{ width: '100%', justifyContent: 'center' }}>
           <Statistic
