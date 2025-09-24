@@ -141,6 +141,11 @@ const CreateGamePage: React.FC = () => {
               <a href="/dashboard">CMS</a>
             </li>
             <li className="breadcrumb-item"><a href={`/kid-reading`}>Reading Management</a></li>
+            {readingId && (
+              <li className="breadcrumb-item">
+                <a href={`/kid-reading/${readingId}/games`}>Reading Games</a>
+              </li>
+            )}
             <li className="breadcrumb-item active">
               {currentGame ? 'Assign Words' : 'Create New Game'}
             </li>

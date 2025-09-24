@@ -6,6 +6,8 @@ import useGameEdit from '../../hooks/useGameEdit';
 import AssignWordsModal from '../../components/games/words/AssignWordsModal';
 import { GAME_TYPES } from '@/utils/constants/options';
 import { toast } from 'react-toastify';
+import { WordType } from '@/types/word';
+import { getWordTypeName } from '@/types/word';
 
 const { TextArea } = Input;
 
@@ -78,10 +80,7 @@ const GameEdit: React.FC = () => {
       dataIndex: 'type',
       key: 'type',
       width: 120,
-      render: (type: number) => {
-        const gameType = GAME_TYPES.find(gt => gt.value === type);
-        return gameType ? gameType.label : `Type: ${type}`;
-      }
+      render: (type: number) => getWordTypeName(type)
     },
   ];
 
@@ -114,8 +113,8 @@ const GameEdit: React.FC = () => {
               <a href={`/kid-reading`}>Reading Management</a>
             </li>
             <li className="breadcrumb-item">
-              <a href={readingId ? `/kid-reading/${readingId}/games` : '/games'}>
-                {readingId ? 'View Game' : 'Games'}
+              <a href={(readingId || game?.prerequisite_reading_id) ? `/kid-reading/${readingId || game?.prerequisite_reading_id}/games` : '/games'}>
+                {(readingId || game?.prerequisite_reading_id) ? 'Reading Games' : 'Games'}
               </a>
             </li>
             <li className="breadcrumb-item active">Edit Game</li>
