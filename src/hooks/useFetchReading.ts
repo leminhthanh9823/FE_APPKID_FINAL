@@ -10,6 +10,7 @@ interface FetchParams {
   sorts?: string | null;
   searchTerm?: string | null;
   is_active?: number | null;
+  difficulty_level?: number | null;
 }
 
 interface ApiResponse<T> {
