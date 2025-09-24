@@ -477,7 +477,7 @@ const AssignWordsPage: React.FC = () => {
             {currentReadingId ? (
               <>
                 <li className="breadcrumb-item"><a href={`/kid-reading`}>Reading Management</a></li>
-                <li className="breadcrumb-item"><a href={`/reading/${currentReadingId}/games`}>Reading Games</a></li>
+                <li className="breadcrumb-item"><a href={`/kid-reading/${currentReadingId}/games`}>Reading Games</a></li>
               </>
             ) : (
               <li className="breadcrumb-item"><a href="/games">Games</a></li>
