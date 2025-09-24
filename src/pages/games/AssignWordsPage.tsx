@@ -482,6 +482,7 @@ const AssignWordsPage: React.FC = () => {
             ) : (
               <li className="breadcrumb-item"><a href="/games">Games</a></li>
             )}
+            <li className="breadcrumb-item"><a href={`/games/${gameId}/edit`}>Edit Game</a></li>
             <li className="breadcrumb-item active">Assign Words</li>
           </ol>
         </nav>
