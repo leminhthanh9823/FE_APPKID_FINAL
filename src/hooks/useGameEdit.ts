@@ -130,7 +130,7 @@ export const useGameEdit = (gameId: string) => {
       
       if (response.data.success) {
         setGame(response.data.data);
-        message.success('Game updated successfully');
+        toast.success('Game updated successfully');
       }
     } catch (error) {
       console.error('Failed to update game:', error);
@@ -162,7 +162,7 @@ export const useGameEdit = (gameId: string) => {
       
       if (response.data.success) {
         await fetchGameWords();
-        message.success('Words updated successfully');
+        toast.success('Words updated successfully');
       }
     } catch (error) {
       console.error('Failed to update words:', error);

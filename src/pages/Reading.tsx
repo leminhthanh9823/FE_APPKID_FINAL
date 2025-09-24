@@ -199,7 +199,7 @@ const Reading: React.FC = () => {
               <li className="breadcrumb-item">
                 <a href={`${ROUTES.DASHBOARD}`}>CMS</a>
               </li>
-              <li className="breadcrumb-item active">Reading</li>
+              <li className="breadcrumb-item active">Reading Management</li>
             </ol>
           </nav>
         </div>
