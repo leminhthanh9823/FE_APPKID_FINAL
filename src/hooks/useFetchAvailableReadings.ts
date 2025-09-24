@@ -56,11 +56,8 @@ const useFetchAvailableReadings = (categoryId: number | null) => {
     }
   }, [categoryId, setIsLoading]);
 
-  useEffect(() => {
-    if (categoryId) {
-      fetchData();
-    }
-  }, [categoryId]);
+  // Remove automatic fetching on categoryId change
+  // Data will only be fetched when explicitly called via refetch or refetchWithFilters
 
   const refetchWithFilters = useCallback((filters: ReadingFilters) => {
     if (categoryId) {

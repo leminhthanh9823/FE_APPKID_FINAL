@@ -2,6 +2,7 @@ export interface LearningPathItem {
   id: number;
   sequence_order: number;
   is_active: boolean;
+  learning_path_category_id: number;
   name: string;
   reading_id: number | null;
   game_id: number | null;
@@ -10,6 +11,7 @@ export interface LearningPathItem {
 }
 
 export interface Category {
+  learning_path_category_id: number;
   category_id: number;
   category_name: string;
   items: LearningPathItem[];
@@ -80,4 +82,65 @@ export interface ReorderItemsResponse {
   status: number;
   errors: null | any;
   data: any;
+}
+
+export interface DeleteReadingResponse {
+  success: boolean;
+  message: string;
+  status: number;
+  errors: null | any;
+  data: {
+    deleted_reading_id: number;
+    deleted_dependent_games: number[];
+    reordered_items_count: number;
+    category_id: number;
+  };
+}
+
+export interface DeleteGameResponse {
+  success: boolean;
+  message: string;
+  status: number;
+  errors: null | any;
+  data: {
+    deleted_game_id: number;
+    reordered_items_count: number;
+    category_id: number;
+  };
+}
+
+export interface ReadingDetails {
+  id: number;
+  title: string;
+  image: string;
+  difficulty_level: number;
+}
+
+export interface GameDetails {
+  id: number;
+  name: string;
+  image: string;
+  prerequisite_reading_id: number;
+}
+
+export interface CategoryItemFromAPI {
+  id: number;
+  sequence_order: number;
+  is_active: boolean;
+  learning_path_category_id: number;
+  name: string;
+  reading_id: number | null;
+  game_id: number | null;
+  image_url: string | null;
+  prerequisite_reading_id: number | null;
+}
+
+export interface FetchCategoryItemsResponse {
+  success: boolean;
+  message: string;
+  status: number;
+  errors: null | any;
+  data: {
+    items: CategoryItemFromAPI[];
+  };
 }

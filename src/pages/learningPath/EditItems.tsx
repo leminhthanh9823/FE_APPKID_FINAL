@@ -2,14 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
 import { toast } from 'react-toastify';
+import Swal from 'sweetalert2';
 import { ROUTES } from "@/routers/routes";
 import useFetchLearningPathItems from '@/hooks/useFetchLearningPathItems';
 import useReorderCategories from '@/hooks/useReorderCategories';
 import useReorderItems from '@/hooks/useReorderItems';
+import useDeleteReading from '@/hooks/useDeleteReading';
+import useDeleteGame from '@/hooks/useDeleteGame';
+import useFetchCategoryItems from '@/hooks/useFetchCategoryItems';
 import { CategoryComponent } from '@/components/LearningPathDragDrop';
 import AddReadingModal from '@/components/AddReadingModal';
+import AddGameModal from '@/components/AddGameModal';
 import { Category, LearningPathItem } from '@/types/learningPath';
 import { AvailableReading } from '@/types/readingModal';
+import { AvailableGame } from '@/types/gameModal';
 
 const EditItems = () => {
   const { id } = useParams<{ id: string }>();
@@ -27,6 +33,9 @@ const EditItems = () => {
   const [categories, setCategoriesState] = useState<Category[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalCategoryId, setModalCategoryId] = useState<number | null>(null);
+  const [isGameModalOpen, setIsGameModalOpen] = useState(false);
+  const [selectedReadingId, setSelectedReadingId] = useState<number | null>(null);
+  const [selectedLearningPathCategoryId, setSelectedLearningPathCategoryId] = useState<number | null>(null);
 
   // Hook for reordering categories
   const { reorderCategories, isSubmitting: isReordering } = useReorderCategories();
@@ -34,9 +43,70 @@ const EditItems = () => {
   // Hook for reordering items within categories
   const { reorderItems, isSubmitting: isReorderingItems } = useReorderItems();
 
+  // Hooks for deleting items
+  const { deleteReading, isSubmitting: isDeletingReading } = useDeleteReading();
+  const { deleteGame, isSubmitting: isDeletingGame } = useDeleteGame();
+  
+  // Hook for fetching category-specific items
+  const { refetchCategoryItems } = useFetchCategoryItems();
+
+  // Helper function to ensure proper sequential ordering
+  const ensureSequentialOrdering = (categories: Category[]): Category[] => {
+    return categories.map(category => {
+      const readings = category.items.filter(item => item.reading_id && !item.game_id);
+      const games = category.items.filter(item => item.game_id);
+      
+      const orderedItems: LearningPathItem[] = [];
+      let sequenceCounter = 1;
+      
+      readings.forEach(reading => {
+        // Add reading with sequential order
+        orderedItems.push({ ...reading, sequence_order: sequenceCounter++ });
+        
+        // Add games belonging to this reading with sequential order
+        const readingGames = games.filter(game => 
+          game.prerequisite_reading_id === reading.reading_id
+        );
+        readingGames.forEach(game => {
+          orderedItems.push({ ...game, sequence_order: sequenceCounter++ });
+        });
+      });
+      
+      return { ...category, items: orderedItems };
+    });
+  };
+
+  // Helper function to find category containing a specific item
+  const findCategoryByItem = (readingId?: number, gameId?: number): Category | null => {
+    return categories.find(category => 
+      category.items.some(item => 
+        (readingId && item.reading_id === readingId) ||
+        (gameId && item.game_id === gameId)
+      )
+    ) || null;
+  };
+
+  // Helper function to update a specific category's items
+  const updateCategoryItems = (learningPathCategoryId: number, newItems: LearningPathItem[]) => {
+    console.log('Updating category items:', { learningPathCategoryId, newItems, currentCategories: categories });
+    
+    const newCategories = categories.map(category => {
+      if (category.learning_path_category_id === learningPathCategoryId) {
+        console.log('Found matching category, updating items:', category.learning_path_category_id);
+        return { ...category, items: newItems };
+      }
+      return category;
+    });
+    
+    console.log('New categories after update:', newCategories);
+    setCategoriesState(newCategories);
+    setCategories(newCategories);
+  };
+
   useEffect(() => {
     if (fetchedCategories) {
-      setCategoriesState(fetchedCategories);
+      const orderedCategories = ensureSequentialOrdering(fetchedCategories);
+      setCategoriesState(orderedCategories);
     }
   }, [fetchedCategories]);
 
@@ -109,8 +179,25 @@ const EditItems = () => {
       const [movedReading] = readings.splice(source.index, 1);
       readings.splice(destination.index, 0, movedReading);
       
-      // Reconstruct category items (readings first, then games)
-      category.items = [...readings, ...games];
+      // Reconstruct category items with proper sequential ordering
+      // Each reading followed by its games in sequence
+      const reconstructedItems: LearningPathItem[] = [];
+      let sequenceCounter = 1;
+      
+      readings.forEach(reading => {
+        // Add reading with sequential order
+        reconstructedItems.push({ ...reading, sequence_order: sequenceCounter++ });
+        
+        // Add games belonging to this reading with sequential order
+        const readingGames = games.filter(game => 
+          game.prerequisite_reading_id === reading.reading_id
+        );
+        readingGames.forEach(game => {
+          reconstructedItems.push({ ...game, sequence_order: sequenceCounter++ });
+        });
+      });
+      
+      category.items = reconstructedItems;
       
       // Update UI immediately (optimistic update)
       newCategories[categoryIndex] = category;
@@ -161,21 +248,37 @@ const EditItems = () => {
       const category = { ...newCategories[categoryIndex] };
       const originalItems = [...category.items];
       
-      // Get games for this specific reading
-      const games = category.items.filter(item => 
+      // Get games for this specific reading and reorder them
+      const thisReadingGames = category.items.filter(item => 
         item.game_id && item.prerequisite_reading_id && item.prerequisite_reading_id.toString() === readingId
       );
       
-      const [movedGame] = games.splice(source.index, 1);
-      games.splice(destination.index, 0, movedGame);
+      const [movedGame] = thisReadingGames.splice(source.index, 1);
+      thisReadingGames.splice(destination.index, 0, movedGame);
 
-      // Reconstruct category items
+      // Reconstruct category items with proper sequential ordering
+      // Each reading followed by its games in sequence
       const readings = category.items.filter(item => item.reading_id && !item.game_id);
-      const otherGames = category.items.filter(item => 
-        item.game_id && (!item.prerequisite_reading_id || item.prerequisite_reading_id.toString() !== readingId)
-      );
+      const allGames = category.items.filter(item => item.game_id);
       
-      category.items = [...readings, ...games, ...otherGames];
+      const reconstructedItems: LearningPathItem[] = [];
+      let sequenceCounter = 1;
+      
+      readings.forEach(reading => {
+        // Add reading with sequential order
+        reconstructedItems.push({ ...reading, sequence_order: sequenceCounter++ });
+        
+        // Add games belonging to this reading with sequential order
+        const readingGames = reading.reading_id?.toString() === readingId 
+          ? thisReadingGames  // Use reordered games for the affected reading
+          : allGames.filter(game => game.prerequisite_reading_id === reading.reading_id);
+        
+        readingGames.forEach(game => {
+          reconstructedItems.push({ ...game, sequence_order: sequenceCounter++ });
+        });
+      });
+      
+      category.items = reconstructedItems;
       
       // Update UI immediately (optimistic update)
       newCategories[categoryIndex] = category;
@@ -213,9 +316,70 @@ const EditItems = () => {
   };
 
   const handleRemoveReading = (item: LearningPathItem) => {
-    console.log('Remove reading:', item);
-    // TODO: Implement remove reading functionality  
-    toast.info('Remove reading feature will be implemented');
+    if (!learningPathId || !item.reading_id) {
+      toast.error('Invalid learning path or reading ID');
+      return;
+    }
+    const category = findCategoryByItem(item.reading_id);
+    if (!category) {
+      toast.error('Category not found for this reading');
+      return;
+    }
+    // Capture non-null IDs for use inside the async callback
+    const readingId = item.reading_id as number;
+    const learningPathCategoryIdForDelete = item.learning_path_category_id;
+
+    // Ask for confirmation using SweetAlert2
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'This will also remove all associated games.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+
+      // Call delete API first, wait for completion before updating UI
+      deleteReading(
+        learningPathId,
+        readingId,
+        // Success callback
+        (responseData) => {
+          console.log('Reading deleted successfully:', responseData);
+          
+          // After successful deletion, refetch items for the affected category only
+          console.log('Refetching category items for category ID:', learningPathCategoryIdForDelete);
+          
+          refetchCategoryItems(
+            learningPathCategoryIdForDelete,
+            (updatedItems) => {
+              console.log('Successfully refetched items for category:', learningPathCategoryIdForDelete);
+              console.log('Updated items:', updatedItems);
+              
+              // Apply sequential ordering and update the specific category
+              const orderedItems = ensureSequentialOrdering([{ 
+                ...category, 
+                items: updatedItems 
+              }])[0].items;
+              
+              console.log('Final ordered items:', orderedItems);
+              updateCategoryItems(learningPathCategoryIdForDelete, orderedItems);
+            },
+            (error) => {
+              console.error('Failed to refetch category items after successful deletion:', error);
+              // Fallback: refetch entire learning path
+              refetch();
+            }
+          );
+        },
+        // Error callback
+        (error) => {
+          console.error('Failed to delete reading:', error);
+          // No UI rollback needed since we didn't update UI optimistically
+        }
+      );
+    });
   };
 
   const handleEditGame = (item: LearningPathItem) => {
@@ -225,9 +389,71 @@ const EditItems = () => {
   };
 
   const handleRemoveGame = (item: LearningPathItem) => {
-    console.log('Remove game:', item);
-    // TODO: Implement remove game functionality
-    toast.info('Remove game feature will be implemented');
+    if (!learningPathId || !item.game_id) {
+      toast.error('Invalid learning path or game ID');
+      return;
+    }
+    const category = findCategoryByItem(undefined, item.game_id);
+    if (!category) {
+      toast.error('Category not found for this game');
+      return;
+    }
+
+    // Capture non-null game id for use inside async callback
+    const gameId = item.game_id as number;
+    const learningPathCategoryIdForDelete = item.learning_path_category_id;
+
+    // Ask for confirmation using SweetAlert2
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'This will delete the game permanently.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+
+      // Call delete API first, wait for completion before updating UI
+      deleteGame(
+        learningPathId,
+        gameId,
+        // Success callback
+        (responseData) => {
+          console.log('Game deleted successfully:', responseData);
+          
+          // After successful deletion, refetch items for the affected category only
+          console.log('Refetching category items for category ID:', learningPathCategoryIdForDelete);
+          
+          refetchCategoryItems(
+            learningPathCategoryIdForDelete,
+            (updatedItems) => {
+              console.log('Successfully refetched items for category:', learningPathCategoryIdForDelete);
+              console.log('Updated items:', updatedItems);
+              
+              // Apply sequential ordering and update the specific category
+              const orderedItems = ensureSequentialOrdering([{ 
+                ...category, 
+                items: updatedItems 
+              }])[0].items;
+              
+              console.log('Final ordered items:', orderedItems);
+              updateCategoryItems(learningPathCategoryIdForDelete, orderedItems);
+            },
+            (error) => {
+              console.error('Failed to refetch category items after successful deletion:', error);
+              // Fallback: refetch entire learning path
+              refetch();
+            }
+          );
+        },
+        // Error callback
+        (error) => {
+          console.error('Failed to delete game:', error);
+          // No UI rollback needed since we didn't update UI optimistically
+        }
+      );
+    });
   };
 
   const handleAddReading = (categoryId?: number) => {
@@ -237,10 +463,39 @@ const EditItems = () => {
 
   const handleModalClose = (wasSuccessful?: boolean) => {
     setIsModalOpen(false);
+    const categoryId = modalCategoryId;
     setModalCategoryId(null);
+    
     // Only refetch learning path items if readings were successfully added
     if (wasSuccessful) {
-      refetch();
+      if (categoryId) {
+        // If we know which category was affected, refetch only that category
+        const lpCategory = categories.find(cat => cat.category_id === categoryId);
+        if (lpCategory && lpCategory.learning_path_category_id) {
+          refetchCategoryItems(
+            lpCategory.learning_path_category_id,
+            (updatedItems) => {
+              // Apply sequential ordering and update category
+              const orderedItems = ensureSequentialOrdering([{ 
+                ...lpCategory, 
+                items: updatedItems 
+              }])[0].items;
+              
+              updateCategoryItems(lpCategory.learning_path_category_id, orderedItems);
+            },
+            (error) => {
+              console.error('Failed to refetch category items after adding reading:', error);
+              // Fallback: refetch all learning path items
+              refetch();
+            }
+          );
+        } else {
+          refetch(); // Fallback if category not found or no learning_path_category_id
+        }
+      } else {
+        // If no specific category, refetch all items
+        refetch();
+      }
     }
   };
 
@@ -249,9 +504,66 @@ const EditItems = () => {
     console.log('Selected readings:', selectedReadings);
   };
 
+  const handleGameModalClose = (wasSuccessful?: boolean) => {
+    setIsGameModalOpen(false);
+    const readingId = selectedReadingId;
+    setSelectedReadingId(null);
+    setSelectedLearningPathCategoryId(null);
+    
+    // Only refetch if games were successfully added
+    if (wasSuccessful && readingId) {
+      // Find category containing this reading
+      const category = categories.find(cat => 
+        cat.items.some(item => item.reading_id === readingId)
+      );
+      
+      if (category) {
+        refetchCategoryItems(
+          category.learning_path_category_id,
+          (updatedItems) => {
+            // Apply sequential ordering and update category
+            const orderedItems = ensureSequentialOrdering([{ 
+              ...category, 
+              items: updatedItems 
+            }])[0].items;
+            
+            updateCategoryItems(category.learning_path_category_id, orderedItems);
+          },
+          (error) => {
+            console.error('Failed to refetch category items after adding game:', error);
+            // Fallback: refetch all learning path items
+            refetch();
+          }
+        );
+      } else {
+        refetch(); // Fallback if category not found
+      }
+    }
+  };
+
+  const handleGameSelect = (selectedGames: AvailableGame[]) => {
+    // This callback will be called when games are successfully added
+    console.log('Selected games:', selectedGames);
+  };
+
   const handleAddGame = (readingId: number) => {
     // TODO: Implement add game functionality
     toast.info('Add game feature will be implemented');
+  };
+
+  const handleAddGameFromLibrary = (readingId: number) => {
+    // Find the category that contains this reading
+    const category = categories.find(cat => 
+      cat.items.some(item => item.reading_id === readingId)
+    );
+    
+    if (category) {
+      setSelectedReadingId(readingId);
+      setSelectedLearningPathCategoryId(category.learning_path_category_id);
+      setIsGameModalOpen(true);
+    } else {
+      console.error('Category not found for reading ID:', readingId);
+    }
   };
 
   const renderDifficultyStars = (level: number) => {
@@ -312,18 +624,18 @@ const EditItems = () => {
               <div>
                 <h2 className="h3 mb-2">
                   <i className="bi bi-book me-2 text-primary"></i>
-                  Edit Learning Path Items: "{learningPath.name}"
+                  Edit learning path items: {learningPath.name}
                 </h2>
                 <div className="d-flex align-items-center">
-                  <span className="badge bg-warning text-dark me-2">
+                  <span className="badge text-dark me-2"  style={{ fontSize: '1em' }}>
                     <i className="bi bi-star-fill me-1"></i>
-                    Difficulty: {renderDifficultyStars(learningPath.difficulty_level)}
+                    Difficulty: Level: {learningPath.difficulty_level}
                   </span>
                 </div>
               </div>
               <button className="btn btn-success" onClick={() => handleAddReading()}>
                 <i className="bi bi-plus-lg me-1"></i>
-                Thêm reading
+                Add reading
               </button>
             </div>
           )}
@@ -348,6 +660,7 @@ const EditItems = () => {
                       onRemoveGame={handleRemoveGame}
                       onAddReading={handleAddReading}
                       onAddGame={handleAddGame}
+                      onAddGameFromLibrary={handleAddGameFromLibrary}
                     />
                   ))}
                   {provided.placeholder}
@@ -373,6 +686,18 @@ const EditItems = () => {
           onSelect={handleReadingSelect}
           selectedCategoryId={modalCategoryId}
           learningPathId={learningPathId}
+        />
+      )}
+
+      {/* Add Game Modal */}
+      {learningPathId && selectedReadingId && selectedLearningPathCategoryId && (
+        <AddGameModal
+          isOpen={isGameModalOpen}
+          onClose={handleGameModalClose}
+          onSelect={handleGameSelect}
+          readingId={selectedReadingId}
+          learningPathId={learningPathId}
+          learningPathCategoryId={selectedLearningPathCategoryId}
         />
       )}
     </main>

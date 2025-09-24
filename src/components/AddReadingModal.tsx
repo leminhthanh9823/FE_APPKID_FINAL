@@ -37,14 +37,23 @@ const AddReadingModal: React.FC<AddReadingModalProps> = ({
   // Add readings to learning path
   const { addReadingsToPath, isSubmitting } = useAddReadingsToPath();
 
-  // Set initial active category
+  // Set initial active category when modal opens
   useEffect(() => {
-    if (selectedCategoryId && activeCategory !== selectedCategoryId) {
-      setActiveCategory(selectedCategoryId);
-    } else if (categories.length > 0 && !activeCategory && !selectedCategoryId) {
-      setActiveCategory(categories[0].id);
+    if (isOpen) {
+      if (selectedCategoryId && activeCategory !== selectedCategoryId) {
+        setActiveCategory(selectedCategoryId);
+      } else if (categories.length > 0 && !activeCategory && !selectedCategoryId) {
+        setActiveCategory(categories[0].id);
+      }
     }
-  }, [selectedCategoryId, categories]);
+  }, [isOpen, selectedCategoryId, categories, activeCategory]);
+
+  // Fetch readings data when modal opens and activeCategory is set
+  useEffect(() => {
+    if (isOpen && activeCategory) {
+      refetch(); // Fetch fresh data when modal opens with a category
+    }
+  }, [isOpen, activeCategory]); // Remove refetch from dependencies to prevent infinite loop
 
   // Handle category selection
   const handleCategorySelect = (categoryId: number) => {
@@ -192,7 +201,7 @@ const AddReadingModal: React.FC<AddReadingModalProps> = ({
               {/* Readings Panel */}
               <div className="col-md-8">
                 <h6 className="fw-bold mb-3">
-                  Readings ({category?.title || 'Select Category'})
+                  Readings
                 </h6>
 
                 {/* Filters */}
