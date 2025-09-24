@@ -787,6 +787,7 @@ const AssignWordsPage: React.FC = () => {
 
               const updatedWord = await editWord(editingWord.id, formData);
               toast.success('Word updated successfully');
+              window.location.reload();
               
               // Update the word in local state
               const updateWordInState = (words: Word[]) => {
