@@ -54,6 +54,7 @@ const Reading: React.FC = () => {
       sorts: null,
       searchTerm: searchTerm === '' ? null : searchTerm,
       is_active: selectedStatus,
+      difficulty_level: selectedDifficulty,
     });
 
   const { toggleStatus } = useToggleStatus({
@@ -116,7 +117,8 @@ const Reading: React.FC = () => {
       page: number,
       search: string,
       size: number,
-      status: number | null
+      status: number | null,
+      difficulty?: number | null
     ) => {
       setIsTableLoading(true);
       setParams({
@@ -125,9 +127,10 @@ const Reading: React.FC = () => {
         sorts: null,
         searchTerm: search === '' ? null : search,
         is_active: status,
+        difficulty_level: typeof difficulty !== 'undefined' ? difficulty : selectedDifficulty,
       });
     },
-    [setParams]
+    [setParams, selectedDifficulty]
   );
 
   useEffect(() => {
@@ -135,7 +138,8 @@ const Reading: React.FC = () => {
       currentPage,
       searchTerm,
       pageSize,
-      selectedStatus
+      selectedStatus,
+      selectedDifficulty
     );
     if (error) toast.error(error);
   }, [
