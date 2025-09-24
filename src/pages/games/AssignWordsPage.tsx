@@ -556,7 +556,6 @@ const AssignWordsPage: React.FC = () => {
                             <p style={{ fontSize: '16px', marginBottom: '8px' }}>No available words found</p>
                             {allWords.length === 0 && (
                               <p style={{ fontSize: '12px', color: '#bfbfbf' }}>
-                                Debug: Total words loaded = {allWords.length}
                               </p>
                             )}
                           </div>
@@ -593,7 +592,6 @@ const AssignWordsPage: React.FC = () => {
                             </p>
                             {gameWords.length === 0 && (
                               <p style={{ fontSize: '12px', color: '#bfbfbf', marginTop: '8px' }}>
-                                Debug: Game words loaded = {gameWords.length}
                               </p>
                             )}
                           </div>
