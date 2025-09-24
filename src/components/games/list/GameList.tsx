@@ -93,7 +93,10 @@ const GameList: React.FC<GameListProps> = ({
     }));
 
     onReorderGames(updatedGames);
-    message.success('Game order updated successfully');
+    // Use toast for notification (consistent with system)
+    import('react-toastify').then(({ toast }) => {
+      toast.success('Game order updated successfully');
+    });
   };
 
   return (

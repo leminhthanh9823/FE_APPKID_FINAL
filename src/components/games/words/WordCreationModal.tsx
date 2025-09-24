@@ -36,7 +36,7 @@ const WordCreationModal: React.FC<WordCreationModalProps> = ({
         onClose();
       }
     } catch (error) {
-      message.error('Failed to create word');
+      toast.error('Failed to create word');
     } finally {
       setLoading(false);
     }

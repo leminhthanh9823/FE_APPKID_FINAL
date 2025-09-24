@@ -5,6 +5,7 @@ import { UploadOutlined } from '@ant-design/icons';
 import useGameEdit from '../../hooks/useGameEdit';
 import AssignWordsModal from '../../components/games/words/AssignWordsModal';
 import { GAME_TYPES } from '@/utils/constants/options';
+import { toast } from 'react-toastify';
 
 const { TextArea } = Input;
 
@@ -179,11 +180,11 @@ const GameEdit: React.FC = () => {
                 beforeUpload={(file) => {
                   const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/gif';
                   if (!isJpgOrPng) {
-                    message.error('You can only upload JPG/PNG/GIF files!');
+                    toast.error('You can only upload JPG/PNG/GIF files!');
                   }
                   const isLt5M = file.size / 1024 / 1024 < 5;
                   if (!isLt5M) {
-                    message.error('Image must smaller than 5MB!');
+                    toast.error('Image must smaller than 5MB!');
                   }
                   return false;
                 }}

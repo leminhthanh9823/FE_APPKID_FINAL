@@ -29,7 +29,7 @@ export const useAssignWords = () => {
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to assign words to game';
       setError(errorMessage);
-      message.error(errorMessage);
+      toast.error(errorMessage);
       throw err;
     } finally {
       setLoading(false);
@@ -47,7 +47,7 @@ export const useAssignWords = () => {
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to remove words from game';
       setError(errorMessage);
-      message.error(errorMessage);
+      toast.error(errorMessage);
       throw err;
     } finally {
       setLoading(false);
