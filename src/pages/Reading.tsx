@@ -10,7 +10,7 @@ import { ReadingColumns } from '../utils/constants/columns/readingColumns';
 import { ReadingCreateFields } from '../utils/constants/create_fields/readingCreateFields';
 import { Constants } from '@/utils/constants/constants';
 import Select from 'react-select';
-import { STATUS_OPTIONS } from '@/utils/constants/options';
+import { DIFFICULTY_OPTIONS, STATUS_OPTIONS } from '@/utils/constants/options';
 import { ROUTES } from '@/routers/routes';
 import { buildRoute } from '@/utils/helper/routeHelper';
 import useFetchEBookCategory from '@/hooks/useFetchEBookCategory';
@@ -27,6 +27,7 @@ const Reading: React.FC = () => {
       localStorage.getItem(Constants.LOCAL_STORAGE_KEY + '-' + ENDPOINT.READING)
     ) || 10
   );
+  const [selectedDifficulty, setSelectedDifficulty] = useState<number | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [readingCreateFields, setReadingCreateFields] =
@@ -180,38 +181,13 @@ const Reading: React.FC = () => {
     setCurrentPage(page);
   }, []);
 
-  const processEditFieldsWithRelations = useCallback(
-    (item: any, fields: Field[]) => {
-      return fields.map((field) => {
-        if (field.name === 'category_id' && field.type === 'multi-select') {
-          let categoryValues = [];
-          if (item.categories && Array.isArray(item.categories)) {
-            categoryValues = item.categories.map((cat: any) => cat.id);
-          } else if (item.category_id) {
-            categoryValues = Array.isArray(item.category_id)
-              ? item.category_id
-              : [item.category_id];
-          }
-          return { ...field, value: categoryValues };
-        } else if (
-          field.name === 'categories' &&
-          field.type === 'multi-select'
-        ) {
-          let categoryValues = [];
-          if (item.categories && Array.isArray(item.categories)) {
-            categoryValues = item.categories.map((cat: any) => cat.id);
-          }
-          return { ...field, value: categoryValues };
-        } else if (field.name === 'is_active' && field.type === 'select') {
-          const activeValue =
-            item.is_active !== undefined ? Number(item.is_active) : field.value;
-          return { ...field, value: activeValue };
-        }
-        return { ...field, value: item[field.name] || field.value };
-      });
-    },
-    []
-  );
+  const handleDifficultyChange = useCallback(
+    (selectedOption: { value: number | null; label: string } | null) => {
+      const newDifficulty = selectedOption ? selectedOption.value : null;
+      setSelectedDifficulty(newDifficulty);
+      setCurrentPage(1);
+    }
+    , []);
 
   return (
     <>
@@ -244,6 +220,17 @@ const Reading: React.FC = () => {
                   alignItems: 'center',
                 }}
               >
+                <div style={{ width: '200px' }}>
+                  <Select
+                    id="status-filter"
+                    options={DIFFICULTY_OPTIONS}
+                    onChange={handleDifficultyChange}
+                    value={DIFFICULTY_OPTIONS.find(
+                      (option) => option.value === selectedDifficulty
+                    )}
+                    placeholder="Select Difficulty"
+                  />
+                </div>
                 <div style={{ width: '200px' }}>
                   <select
                     value={selectedCategory || ''}

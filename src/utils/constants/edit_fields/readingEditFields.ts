@@ -1,5 +1,5 @@
 import Field from '../../../types/field';
-import { STATUS_UC_OPTIONS } from '../options';
+import { DIFFICULTY_OPTIONS_UC, STATUS_UC_OPTIONS } from '../options';
 
 export const ReadingEditFields: Field[] = [
   {
@@ -47,14 +47,8 @@ export const ReadingEditFields: Field[] = [
     value: 1,
     isRequired: true,
     colSpan: 12,
-    rowGroup: '3',
-    options: [
-      { value: 1, label: '1' },
-      { value: 2, label: '2' },
-      { value: 3, label: '3' },
-      { value: 4, label: '4' },
-      { value: 5, label: '5' },
-    ],
+    rowGroup: '4',
+    options: DIFFICULTY_OPTIONS_UC,
   },
   {
     name: 'is_active',
@@ -62,7 +56,7 @@ export const ReadingEditFields: Field[] = [
     type: 'select',
     value: '',
     isRequired: true,
-    rowGroup: '4',
+    rowGroup: '5',
     colSpan: 12,
     options: STATUS_UC_OPTIONS,
   },
@@ -72,7 +66,7 @@ export const ReadingEditFields: Field[] = [
     type: 'file',
     value: '',
     isRequired: true,
-    rowGroup: '5',
+    rowGroup: '6',
     colSpan: 12,
     fileAccept: 'video/*',
   },
@@ -82,7 +76,7 @@ export const ReadingEditFields: Field[] = [
     type: 'file',
     value: '',
     isRequired: true,
-    rowGroup: '6',
+    rowGroup: '7',
     colSpan: 12,
   },
 ];
