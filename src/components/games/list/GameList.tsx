@@ -110,45 +110,59 @@ const GameList: React.FC<GameListProps> = ({
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId="games-list">
-          {(provided) => (
+        <Droppable droppableId="games-list" direction="horizontal">
+          {(provided, snapshot) => (
             <div
               {...provided.droppableProps}
               ref={provided.innerRef}
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '16px',
+                minHeight: '200px',
+                padding: '8px',
+                backgroundColor: snapshot.isDraggingOver ? '#f0f8ff' : 'transparent',
+                border: snapshot.isDraggingOver ? '2px dashed #1890ff' : '2px dashed transparent',
+                borderRadius: '8px',
+                transition: 'all 0.2s ease',
+              }}
             >
-              <Row gutter={[16, 16]}>
-                {sortedGames.map((game, index) => (
-                  <Draggable 
-                    key={game.id} 
-                    draggableId={game.id.toString()} 
-                    index={index}
-                    isDragDisabled={!onReorderGames}
-                  >
-                    {(provided, snapshot) => (
-                      <Col 
-                        xs={24} sm={12} lg={8} xl={6}
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        style={{
-                          ...provided.draggableProps.style,
-                          opacity: snapshot.isDragging ? 0.8 : 1,
-                          transform: snapshot.isDragging 
-                            ? `${provided.draggableProps.style?.transform} rotate(5deg)`
-                            : provided.draggableProps.style?.transform
-                        }}
-                      >
-                        <GameCard
-                          game={game}
-                          onEdit={onEditGame}
-                          onDelete={onDeleteGame}
-                          isDragging={snapshot.isDragging}
-                        />
-                      </Col>
-                    )}
-                  </Draggable>
-                ))}
-              </Row>
+              {sortedGames.map((game, index) => (
+                <Draggable 
+                  key={game.id} 
+                  draggableId={game.id.toString()} 
+                  index={index}
+                  isDragDisabled={!onReorderGames}
+                >
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      style={{
+                        ...provided.draggableProps.style,
+                        opacity: snapshot.isDragging ? 0.9 : 1,
+                        transform: provided.draggableProps.style?.transform,
+                        transition: 'transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s',
+                        zIndex: snapshot.isDragging ? 1000 : 'auto',
+                        boxShadow: snapshot.isDragging 
+                          ? '0 12px 24px rgba(0,0,0,0.15), 0 6px 12px rgba(0,0,0,0.1)' 
+                          : 'none',
+                        flexShrink: 0,
+                        width: '320px',
+                        marginBottom: '16px',
+                      }}
+                    >
+                       <GameCard
+                         game={game}
+                         onEdit={onEditGame}
+                         onDelete={onDeleteGame}
+                         isDragging={snapshot.isDragging}
+                       />
+                     </div>
+                  )}
+                </Draggable>
+              ))}
               {provided.placeholder}
             </div>
           )}
