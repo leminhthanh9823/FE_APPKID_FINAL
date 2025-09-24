@@ -133,9 +133,7 @@ const GameList: React.FC<GameListProps> = ({
                         style={{
                           ...provided.draggableProps.style,
                           opacity: snapshot.isDragging ? 0.8 : 1,
-                          transform: snapshot.isDragging 
-                            ? `${provided.draggableProps.style?.transform} rotate(5deg)`
-                            : provided.draggableProps.style?.transform
+                          transform: provided.draggableProps.style?.transform
                         }}
                       >
                         <GameCard

@@ -11,6 +11,7 @@ interface CategoryProps {
   onRemoveGame: (item: LearningPathItem) => void;
   onAddReading: (categoryId: number) => void;
   onAddGame: (readingId: number) => void;
+  onAddGameFromLibrary: (readingId: number) => void;
 }
 
 const CategoryComponent: React.FC<CategoryProps> = ({
@@ -21,7 +22,8 @@ const CategoryComponent: React.FC<CategoryProps> = ({
   onEditGame,
   onRemoveGame,
   onAddReading,
-  onAddGame
+  onAddGame,
+  onAddGameFromLibrary
 }) => {
   const readings = category.items.filter(item => item.reading_id && !item.game_id);
   const games = category.items.filter(item => item.game_id);
@@ -46,7 +48,7 @@ const CategoryComponent: React.FC<CategoryProps> = ({
               </div>
               <i className="bi bi-folder-fill text-warning me-2"></i>
               <h5 className="mb-0 fw-bold">
-                {category.category_id}. Chủ đề: {category.category_name}
+                {category.category_id}. Topic: {category.category_name}
               </h5>
               <button
                 className="btn btn-sm btn-light ms-2"
@@ -63,7 +65,7 @@ const CategoryComponent: React.FC<CategoryProps> = ({
               onClick={() => onAddReading(category.category_id)}
             >
               <i className="bi bi-plus-lg me-1"></i>
-              Thêm reading trong nhóm này
+              Add reading to current topic
             </button>
           </div>
 
@@ -90,13 +92,14 @@ const CategoryComponent: React.FC<CategoryProps> = ({
                       onEditGame={onEditGame}
                       onRemoveGame={onRemoveGame}
                       onAddGame={onAddGame}
+                      onAddGameFromLibrary={onAddGameFromLibrary}
                     />
                   ))}
                   {provided.placeholder}
                   {readings.length === 0 && (
                     <div className="text-center py-3 text-muted">
                       <i className="bi bi-book me-2"></i>
-                      Chưa có bài đọc nào trong chủ đề này
+                        Let add readings to this topic.
                     </div>
                   )}
                 </div>
@@ -118,6 +121,7 @@ interface ReadingItemProps {
   onEditGame: (item: LearningPathItem) => void;
   onRemoveGame: (item: LearningPathItem) => void;
   onAddGame: (readingId: number) => void;
+  onAddGameFromLibrary: (readingId: number) => void;
 }
 
 const ReadingItem: React.FC<ReadingItemProps> = ({
@@ -128,7 +132,8 @@ const ReadingItem: React.FC<ReadingItemProps> = ({
   onRemoveReading,
   onEditGame,
   onRemoveGame,
-  onAddGame
+  onAddGame,
+  onAddGameFromLibrary
 }) => {
   return (
     <Draggable draggableId={`reading-${reading.id}`} index={index}>
@@ -150,7 +155,7 @@ const ReadingItem: React.FC<ReadingItemProps> = ({
               </div>
               <i className="bi bi-book-fill text-info me-2"></i>
               <h6 className="mb-0 fw-semibold flex-grow-1 d-flex align-items-center">
-                {reading.sequence_order}.{reading.sequence_order} Bài {reading.sequence_order}: {reading.name}
+                {reading.sequence_order}. Reading: {reading.name}
                 <button
                   className="btn btn-sm bg-transparent border-0 ms-2"
                   type="button"
@@ -173,7 +178,7 @@ const ReadingItem: React.FC<ReadingItemProps> = ({
                   style={{ minWidth: 120 }}
                 >
                   <i className="bi bi-plus-lg me-1"></i>
-                  Thêm Game
+                  Add game
                 </button>
                 <ul className="dropdown-menu">
                   <li>
@@ -182,13 +187,16 @@ const ReadingItem: React.FC<ReadingItemProps> = ({
                       onClick={() => reading.reading_id && onAddGame(reading.reading_id)}
                     >
                       <i className="bi bi-plus-circle me-2"></i>
-                      Tạo Game mới
+                      Create new game
                     </button>
                   </li>
                   <li>
-                    <button className="dropdown-item">
+                    <button 
+                      className="dropdown-item"
+                      onClick={() => reading.reading_id && onAddGameFromLibrary(reading.reading_id)}
+                    >
                       <i className="bi bi-collection me-2"></i>
-                      Chọn từ thư viện
+                      Select form Library
                     </button>
                   </li>
                 </ul>
@@ -200,7 +208,7 @@ const ReadingItem: React.FC<ReadingItemProps> = ({
                 title="Edit reading"
               >
                 <i className="bi bi-pencil-fill me-1"></i>
-                Sửa
+                Edit
               </button>
               <button
                 className="btn btn-danger btn-sm d-flex align-items-center"
@@ -209,7 +217,7 @@ const ReadingItem: React.FC<ReadingItemProps> = ({
                 title="Remove reading"
               >
                 <i className="bi bi-trash-fill me-1"></i>
-                Xóa
+                Remove
               </button>
             </div>
           </div>
@@ -280,7 +288,7 @@ const GameItem: React.FC<GameItemProps> = ({
                 </div>
                 <i className="bi bi-controller text-secondary me-2"></i>
                 <small className="fw-medium text-dark">
-                  {game.sequence_order}.{(game.sequence_order || 0) + 1} Game: {game.name}
+                  {game.sequence_order}. Game: {game.name}
                 </small>
               </div>
               <div className="d-flex align-items-center gap-2">

@@ -26,9 +26,12 @@ export const ENDPOINT = {
   NOTIFY: '/notify',
   FEEDBACK: '/feedback',
   LEARNING_PATH: '/learning-path',
-  LEARNING_PATH_ADD_ITEMS: '/learning-path/:pathId/add-items',
+  LEARNING_PATH_ADD_ITEMS: '/learning-path/:pathId/add-readings',
   LEARNING_PATH_REORDER_CATEGORIES: '/learning-path/:pathId/categories/reorder',
   LEARNING_PATH_REORDER_ITEMS: '/learning-path/:pathId/categories/:categoryId/items/reorder',
+  LEARNING_PATH_DELETE_READING: '/learning-path/:pathId/reading/:readingId',
+  LEARNING_PATH_DELETE_GAME: '/learning-path/:pathId/game/:gameId',
+  LEARNING_PATH_CATEGORY_ITEMS: '/learning-path/category/:pathCategoryId/items',
   PARENT: '/parent',
 
   // Reading category and available readings APIs
