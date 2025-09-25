@@ -1,8 +1,10 @@
 export enum GameType {
-  WordMatch = 'Word Match',
-  WordOrder = 'Word Order',
+  Wordle = 'Wordle',
+  Puzzle = 'Puzzle',
   MemoryGame = 'Memory Game',
-  SpellingGame = 'Spelling Game',
+  MissingWord = 'Missing Word',
+  ImagePuzzle = 'Image Puzzle',
+  FourPicturesOneWord = 'Four Pictures One Word',
 }
 
 export interface PrerequisiteReading {
@@ -14,7 +16,7 @@ export interface Game {
   id: number;
   name: string;
   description?: string;
-  type: number;
+  type: string;
   image?: string;
   prerequisite_reading_id?: number;
   sequence_order: number;

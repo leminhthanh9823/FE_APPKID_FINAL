@@ -142,7 +142,7 @@ const GameCard: React.FC<GameCardProps> = ({
 
   const getGameTypeName = (type: number) => {
     const gameTypes = Object.values(GameType);
-    return gameTypes[type] || 'Unknown';
+    return gameTypes[type - 1] || 'Unknown';
   };
 
   const menuItems = [

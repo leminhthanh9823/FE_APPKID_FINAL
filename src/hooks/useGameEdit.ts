@@ -162,10 +162,8 @@ export const useGameEdit = (gameId: string) => {
       
       if (response.data.success) {
         await fetchGameWords();
-        toast.success('Words updated successfully');
       }
     } catch (error) {
-      console.error('Failed to update words:', error);
       toast.error('Failed to update words');
     } finally {
       setLoading(false);

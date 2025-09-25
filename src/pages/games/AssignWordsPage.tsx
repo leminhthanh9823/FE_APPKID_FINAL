@@ -237,6 +237,8 @@ const ActionButtonsContainer = styled.div`
 `;
 
 const AssignWordsPage: React.FC = () => {
+  // Only allow 1 word for these types
+  const SINGLE_WORD_TYPES = ['image_puzzle', 'four_pics_one_word'];
   const { gameId } = useParams();
   const navigate = useNavigate();
   const [searchText, setSearchText] = useState('');
@@ -311,11 +313,13 @@ const AssignWordsPage: React.FC = () => {
       });
 
       const currentLevelWords = allWords.filter(w => w.level === parseInt(selectedLevel));
-      
       const available = currentLevelWords.filter(w => !allAssignedWordIds.has(w.id));
-      
-      const assigned = allLevelAssignments[selectedLevel] || [];
+      let assigned = allLevelAssignments[selectedLevel] || [];
 
+      // If game type is single-word, only allow 1 assigned word
+      if (game && SINGLE_WORD_TYPES.includes(game.type) && assigned.length > 1) {
+        assigned = assigned.slice(0, 1);
+      }
       setAvailableWords(available);
       setAssignedWords(assigned);
     }
@@ -329,9 +333,16 @@ const AssignWordsPage: React.FC = () => {
 
   const handleDragEnd = React.useCallback((result: DropResult) => {
     if (!result.destination) return;
-
     const { source, destination } = result;
-    
+    // If game type is single-word, only allow 1 assigned word
+    if (game && SINGLE_WORD_TYPES.includes(game.type)) {
+      if (source.droppableId === 'available' && destination.droppableId === 'assigned') {
+        if (assignedWords.length >= 1) {
+          toast.error('This game type only allows 1 word.');
+          return;
+        }
+      }
+    }
     if (source.droppableId === destination.droppableId) {
       // Reordering within the same list
       if (source.droppableId === 'available') {
@@ -345,10 +356,7 @@ const AssignWordsPage: React.FC = () => {
         const newAssignedWords = Array.from(assignedWords);
         const [reorderedItem] = newAssignedWords.splice(result.source.index, 1);
         newAssignedWords.splice(result.destination!.index, 0, reorderedItem);
-        
         setAssignedWords(newAssignedWords);
-        
-        // Update persistent state for current level
         setAllLevelAssignments(prev => ({
           ...prev,
           [selectedLevel]: newAssignedWords
@@ -361,12 +369,14 @@ const AssignWordsPage: React.FC = () => {
         const movedItem = availableWords[source.index];
         const newAvailableWords = availableWords.filter((_, index) => index !== source.index);
         const newAssignedWords = Array.from(assignedWords);
+        // If single-word type, only allow 1
+        if (game && SINGLE_WORD_TYPES.includes(game.type) && newAssignedWords.length >= 1) {
+          toast.error('This game type only allows 1 word.');
+          return;
+        }
         newAssignedWords.splice(destination.index, 0, movedItem);
-        
         setAvailableWords(newAvailableWords);
         setAssignedWords(newAssignedWords);
-        
-        // Update persistent state for current level
         setAllLevelAssignments(prev => ({
           ...prev,
           [selectedLevel]: newAssignedWords
@@ -377,11 +387,8 @@ const AssignWordsPage: React.FC = () => {
         const newAssignedWords = assignedWords.filter((_, index) => index !== source.index);
         const newAvailableWords = Array.from(availableWords);
         newAvailableWords.splice(destination.index, 0, movedItem);
-        
         setAssignedWords(newAssignedWords);
         setAvailableWords(newAvailableWords);
-        
-        // Update persistent state for current level
         setAllLevelAssignments(prev => ({
           ...prev,
           [selectedLevel]: newAssignedWords
@@ -428,14 +435,6 @@ const AssignWordsPage: React.FC = () => {
             order: index + 1
           });
         });
-      });
-
-      console.log('Saving word assignments:', {
-        totalAssignments: allAssignments.length,
-        byLevel: Object.keys(allLevelAssignments).reduce((acc, level) => {
-          acc[level] = allLevelAssignments[level].length;
-          return acc;
-        }, {} as any)
       });
 
       await updateGameWords(allAssignments);
@@ -774,21 +773,19 @@ const AssignWordsPage: React.FC = () => {
             try {
               const formData = new FormData();
               
-              // Append word data fields
               formData.append('word', values.word);
               formData.append('type', values.type.toString());
               formData.append('level', values.level.toString());
               formData.append('note', values.note || '');
               formData.append('is_active', '1');
               
-              // Append file if exists and is a new upload
               if (values.image && values.image[0] && values.image[0].originFileObj) {
                 formData.append('image', values.image[0].originFileObj);
               }
 
               const updatedWord = await editWord(editingWord.id, formData);
-              toast.success('Word updated successfully');
               window.location.reload();
+              toast.success('Word updated successfully');
               
               // Update the word in local state
               const updateWordInState = (words: Word[]) => {
