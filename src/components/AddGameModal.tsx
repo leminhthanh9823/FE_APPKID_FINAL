@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import useFetchReadingGames from '@/hooks/useFetchReadingGames';
-import useAddGamesToReading from '@/hooks/useAddGamesToReading';
+import useAddGamesToPath from '@/hooks/useAddGamesToPath';
 import { AddGameModalProps, AvailableGame, GameFilters } from '@/types/gameModal';
 import { GAME_TYPES } from '@/utils/constants/options';
 
@@ -29,7 +29,7 @@ const AddGameModal: React.FC<AddGameModalProps> = ({
   } = useFetchReadingGames(readingId);
 
   // Add games to reading
-  const { addGamesToReading, isSubmitting } = useAddGamesToReading();
+  const { addGamesToPath , isSubmitting } = useAddGamesToPath();
 
   // Fetch games data when modal opens
   useEffect(() => {
@@ -80,7 +80,7 @@ const AddGameModal: React.FC<AddGameModalProps> = ({
     const gameIds = selectedGames.map(g => g.id);
     
     try {
-      await addGamesToReading(
+      await addGamesToPath(
         learningPathId,
         learningPathCategoryId,
         readingId,

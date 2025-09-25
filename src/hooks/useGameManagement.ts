@@ -3,6 +3,7 @@ import { useGameContext } from '../stores/contexts/GameContext';
 import { Game, GameStatus, CreateGameDto, UpdateGameDto } from '../types/game';
 import apiClient from '../apis/apiRequest';
 import { useParams } from 'react-router-dom';
+import { ResponseCreateGameDto } from '@/pages/games/CreateGamePage';
 
 export const useGameManagement = () => {
   const { state, dispatch } = useGameContext();
@@ -59,7 +60,7 @@ export const useGameManagement = () => {
     fetchGames();
   }, [readingId]);
 
-  const createGame = async (gameData: any) => {
+  const createGame = async (gameData: any): Promise<ResponseCreateGameDto> => {
     if (!readingId) {
       throw new Error('Reading ID is required to create a game');
     }

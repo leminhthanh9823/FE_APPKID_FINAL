@@ -8,14 +8,25 @@ import WordAssignmentPanel from '../../components/games/words/WordAssignmentPane
 import useGameManagement from '../../hooks/useGameManagement';
 import apiClient from '../../apis/apiRequest';
 import { Game } from '../../types/game';
-import { GameWord, Word, CreateGameWordDto } from '../../types/word';
+import { GameWord, Word } from '../../types/word';
+import Swal from 'sweetalert2';
+import useAddGamesToPath from '@/hooks/useAddGamesToPath';
 
-interface CreateGameDto {
+export interface ResponseCreateGameDto {
+  id: number;
   name: string;
   type: number;
   description?: string;
-  readingId: number;
-  isActive: number;
+  image : string;
+  is_active: number;
+  sequence_order: number;
+  prerequisite_reading_id: number;
+  pathItem: {
+    readingId: number;
+    pathCategoryId?: number;
+    pathId?: number;
+    pathName?: string;
+  }
 }
 
 interface GameFormData {
@@ -36,6 +47,7 @@ const createWordAssignment = (word: GameWord, index: number, gameId: number) => 
 const CreateGamePage: React.FC = () => {
   const navigate = useNavigate();
   const { createGame } = useGameManagement();
+  const { addGamesToPath , isSubmitting } = useAddGamesToPath();
   const [currentGame, setCurrentGame] = useState<Game | null>(null);
   const [selectedWords, setSelectedWords] = useState<GameWord[]>([]);
   const [loading, setLoading] = useState(false);
@@ -47,15 +59,43 @@ const CreateGamePage: React.FC = () => {
     try {
       const newGame = await createGame({
         ...formData,
-        readingId: parseInt(readingId || '0'),
-        isActive: 1
-      } as CreateGameDto);
+      });
+
+      let parsedNewGame : ResponseCreateGameDto = newGame;
       toast.success('Game created successfully');
-      // Navigate to games list in reading after creation
-      if (readingId) {
-        navigate(`/kid-reading/${readingId}/games`);
-      } else {
-        navigate('/kid-reading');
+       if (
+        parsedNewGame &&
+        parsedNewGame.pathItem &&
+        parsedNewGame.pathItem.pathId !== undefined &&
+        parsedNewGame.pathItem.pathCategoryId !== undefined
+      ) {
+        const pathName = parsedNewGame.pathItem.pathName || 'this path';
+        const result = await Swal.fire({
+          title: `We found that`,
+          html: `This reading already in a learning path "<b>${pathName}</b>"<br>Do you want to add it to the path now?`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, add now',
+          cancelButtonText: 'No, go to update',
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          backdrop: true,
+          allowOutsideClick: false,
+          customClass: { container: 'swal-high-z-index' }
+        });
+        const gid = (parsedNewGame as any).id;
+        // If user chooses to go to update (cancel), navigate to edit screen
+        if (result.isDismissed || result.isDenied || result.isDismissed) {
+          navigate(`/games/${gid}/edit`);
+        } else if (result.isConfirmed) {
+          await addGamesToPath(
+            parsedNewGame.pathItem.pathId,
+            parsedNewGame.pathItem.pathCategoryId,
+            parseInt(readingId!),
+            [gid],
+          );
+          navigate(`/games/${gid}/edit`);
+        }
       }
     } catch (error) {
       if (error instanceof Error) {

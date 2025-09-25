@@ -3,10 +3,10 @@ import { toast } from 'react-toastify';
 import apiClient from '@/apis/apiRequest';
 import { AddGamesToReadingRequest, AddGamesToReadingResponse } from '@/types/gameModal';
 
-const useAddGamesToReading = () => {
+const useAddGamesToPath = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const addGamesToReading = async (
+  const addGamesToPath = async (
     learningPathId: number,
     learningPathCategoryId: number,
     readingId: number,
@@ -32,16 +32,12 @@ const useAddGamesToReading = () => {
       );
 
       if (response.data.success) {
-        const { added_games, skipped_duplicates } = response.data.data;
+        const { added_games } = response.data.data;
         
         if (added_games.length > 0) {
-          toast.success(`Successfully added ${added_games.length} game(s)`);
+          toast.success(`Successfully added game(s)`);
         }
-        
-        if (skipped_duplicates && skipped_duplicates.length > 0) {
-          toast.warning(`${skipped_duplicates.length} game(s) were skipped (already in learning path)`);
-        }
-
+      
         if (onSuccess) {
           onSuccess(response.data.data);
         }
@@ -61,9 +57,9 @@ const useAddGamesToReading = () => {
   };
 
   return {
-    addGamesToReading,
+    addGamesToPath,
     isSubmitting
   };
 };
 
-export default useAddGamesToReading;
+export default useAddGamesToPath;
