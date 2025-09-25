@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
@@ -29,6 +29,8 @@ const EditItems = () => {
     error, 
     refetch 
   } = useFetchLearningPathItems(learningPathId);
+
+  const navigate = useNavigate();
 
   const [categories, setCategoriesState] = useState<Category[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -310,9 +312,13 @@ const EditItems = () => {
   };
 
   const handleEditReading = (item: LearningPathItem) => {
-    console.log('Edit reading:', item);
-    // TODO: Implement edit reading functionality
-    toast.info('Edit reading feature will be implemented');
+    const params = new URLSearchParams();
+
+    if (item.name) {
+      params.set('searchTerm', item.name);
+      const url = `${window.location.origin}${ROUTES.READING}?${params.toString()}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
   };
 
   const handleRemoveReading = (item: LearningPathItem) => {
@@ -383,9 +389,10 @@ const EditItems = () => {
   };
 
   const handleEditGame = (item: LearningPathItem) => {
-    console.log('Edit game:', item);
-    // TODO: Implement edit game functionality
-    toast.info('Edit game feature will be implemented');
+    if (item.game_id) {
+      const url = `${window.location.origin}/games/${item.game_id}/edit`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
   };
 
   const handleRemoveGame = (item: LearningPathItem) => {
@@ -547,8 +554,9 @@ const EditItems = () => {
   };
 
   const handleAddGame = (readingId: number) => {
-    // TODO: Implement add game functionality
-    toast.info('Add game feature will be implemented');
+    if (readingId) {
+      navigate(`${ROUTES.CREATE_GAME.replace(':id', readingId.toString())}`)
+    }
   };
 
   const handleAddGameFromLibrary = (readingId: number) => {
@@ -564,12 +572,6 @@ const EditItems = () => {
     } else {
       console.error('Category not found for reading ID:', readingId);
     }
-  };
-
-  const renderDifficultyStars = (level: number) => {
-    return Array.from({ length: level }, (_, index) => (
-      <span key={index} className="star">★</span>
-    ));
   };
 
   if (error) {
@@ -686,6 +688,7 @@ const EditItems = () => {
           onSelect={handleReadingSelect}
           selectedCategoryId={modalCategoryId}
           learningPathId={learningPathId}
+          difficultyLevel={learningPath ? learningPath.difficulty_level : null}
         />
       )}
 

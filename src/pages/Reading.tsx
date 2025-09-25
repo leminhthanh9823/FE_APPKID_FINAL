@@ -19,8 +19,12 @@ import { useSearchParams } from 'react-router-dom';
 import { ReadingEditFields } from '@/utils/constants/edit_fields/readingEditFields';
 
 const Reading: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const category_id = searchParams.get('category_id');
+  const searchTermFromParams = searchParams.get('searchTerm') || '';
+
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<string>(searchTermFromParams);
   const [isTableLoading, setIsTableLoading] = useState(false);
   const [pageSize, setPageSize] = useState<number>(
     Number(
@@ -34,8 +38,7 @@ const Reading: React.FC = () => {
     useState<Field[]>(ReadingCreateFields);
   const [readingEditFields, setReadingEditFields] =
     useState<Field[]>(ReadingEditFields);
-  const [searchParams] = useSearchParams();
-  const category_id = searchParams.get('category_id');
+
 
   useEffect(() => {
     if (category_id && !selectedCategory) {
@@ -270,6 +273,7 @@ const Reading: React.FC = () => {
             editFields={readingEditFields}
             columns={ReadingColumns}
             data={data}
+            defaultValueSearchTerm={searchTerm}
             onSearch={handleSearch}
             endpoint={ENDPOINT.READING}
             isCreatable={true}

@@ -42,13 +42,6 @@ export interface CategoryReadingsResponse {
   };
 }
 
-export interface AddReadingModalProps {
-  isOpen: boolean;
-  onClose: (wasSuccessful?: boolean) => void;
-  onSelect: (selectedReadings: AvailableReading[]) => void;
-  selectedCategoryId?: number | null; // If provided, only show this category
-  learningPathId: number;
-}
 
 export interface ReadingFilters {
   difficulty?: number | null;
