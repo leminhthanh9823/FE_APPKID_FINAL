@@ -48,7 +48,7 @@ const CategoryComponent: React.FC<CategoryProps> = ({
               </div>
               <i className="bi bi-folder-fill text-warning me-2"></i>
               <h5 className="mb-0 fw-bold">
-                {category.category_id}. Topic: {category.category_name}
+                {index+1}. Topic: {category.category_name}
               </h5>
               <button
                 className="btn btn-sm btn-light ms-2"

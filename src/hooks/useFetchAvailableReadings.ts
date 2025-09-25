@@ -22,7 +22,7 @@ const useFetchAvailableReadings = (categoryId: number | null) => {
       // Build query parameters for filters as plain object
       const params: Record<string, any> = {};
       if (filters?.difficulty) {
-        params.difficulty = filters.difficulty;
+        params.difficulty_level = filters.difficulty;
       }
       if (filters?.searchTerm) {
         params.search = filters.searchTerm;

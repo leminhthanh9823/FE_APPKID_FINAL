@@ -32,6 +32,7 @@ interface TableProps<T extends Record<string, any>> {
   isSearchable?: boolean;
   trueLabel?: string;
   falseLabel?: string;
+  defaultValueSearchTerm?: string;
   onSearch?: (searchTerm: string) => void;
   endpoint: string;
   customActions?: CustomAction[];
@@ -71,6 +72,7 @@ const Table: React.FC<TableProps<any>> = ({
   isEditable = true,
   isSearchable = true,
   isDeletable = true,
+  defaultValueSearchTerm = '',
   onSearch,
   trueLabel = 'Active',
   falseLabel = 'Inactive',
@@ -111,7 +113,7 @@ const Table: React.FC<TableProps<any>> = ({
   const [editField, setEditField] = useState<Field[]>(editFields);
   const [createField, setCreateField] = useState<Field[]>(createFields);
   const [selectedItem, setSelectedItem] = useState<any>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(defaultValueSearchTerm);
   const [createTitle, setCreateTitle] = useState('Create new');
   const [sortConfig, setSortConfig] = useState<{
     key: string | null;

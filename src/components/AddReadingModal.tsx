@@ -1,25 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { DIFFICULTY_OPTIONS, SEARCH_AVAILABLE_READING } from '@/utils/constants/options';
 import useFetchReadingCategories from '@/hooks/useFetchReadingCategories';
 import useFetchAvailableReadings from '@/hooks/useFetchAvailableReadings';
 import useAddReadingsToPath from '@/hooks/useAddReadingsToPath';
-import { AddReadingModalProps, AvailableReading, ReadingFilters } from '@/types/readingModal';
+import { AvailableReading, ReadingFilters } from '@/types/readingModal';
+
+export interface AddReadingModalProps {
+  isOpen: boolean;
+  onClose: (wasSuccessful?: boolean) => void;
+  onSelect: (selectedReadings: AvailableReading[]) => void;
+  selectedCategoryId?: number | null; // If provided, only show this category
+  learningPathId: number;
+  difficultyLevel?: number | null; // Optional difficulty level filter
+}
 
 const AddReadingModal: React.FC<AddReadingModalProps> = ({
   isOpen,
   onClose,
   onSelect,
   selectedCategoryId = null,
-  learningPathId
+  learningPathId,
+  difficultyLevel = null
 }) => {
   const [activeCategory, setActiveCategory] = useState<number | null>(selectedCategoryId);
   const [selectedReadings, setSelectedReadings] = useState<AvailableReading[]>([]);
   const [wasSuccessful, setWasSuccessful] = useState(false);
   const [filters, setFilters] = useState<ReadingFilters>({
-    difficulty: null,
+    difficulty: difficultyLevel,
     available: null,
     searchTerm: ''
   });
+
+  // Keep a ref to the latest filters so we can read them synchronously
+  // (useful when user changes a filter and immediately triggers search)
+  const filtersRef = useRef<ReadingFilters>(filters);
 
   // Fetch categories (only if not pre-selected)
   const { categories, error: categoriesError } = useFetchReadingCategories();
@@ -51,9 +65,15 @@ const AddReadingModal: React.FC<AddReadingModalProps> = ({
   // Fetch readings data when modal opens and activeCategory is set
   useEffect(() => {
     if (isOpen && activeCategory) {
-      refetch(); // Fetch fresh data when modal opens with a category
+      // set difficulty from prop into filters (do not mutate state directly)
+      const initialFilters = { ...filters, difficulty: difficultyLevel };
+      setFilters(initialFilters);
+      // keep ref in sync with initial filters
+      filtersRef.current = initialFilters;
+      // perform initial fetch for this category
+      refetchWithFilters(initialFilters);
     }
-  }, [isOpen, activeCategory]); // Remove refetch from dependencies to prevent infinite loop
+  }, [isOpen, activeCategory]); // intentionally omitting filters/refetch from deps
 
   // Handle category selection
   const handleCategorySelect = (categoryId: number) => {
@@ -62,6 +82,7 @@ const AddReadingModal: React.FC<AddReadingModalProps> = ({
       setSelectedReadings([]); // Clear selections when changing category
       const resetFilters = { difficulty: null, available: null, searchTerm: '' };
       setFilters(resetFilters);
+      filtersRef.current = resetFilters;
       // Don't call refetchWithFilters here - let the hook handle it automatically when categoryId changes
     }
   };
@@ -85,14 +106,39 @@ const AddReadingModal: React.FC<AddReadingModalProps> = ({
 
   // Handle filter changes
   const handleFilterChange = (newFilters: Partial<ReadingFilters>) => {
-    const updatedFilters = { ...filters, ...newFilters };
+    // Update local filters state. For dropdowns (difficulty/available) we want
+    // to trigger a fetch immediately. For searchTerm (typing), we only fetch
+    // on Enter or when the Search button is clicked.
+    const updatedFilters = { ...filtersRef.current, ...newFilters };
     setFilters(updatedFilters);
-    refetchWithFilters(updatedFilters);
+    // keep ref in sync so searches use the latest values even before state commits
+    filtersRef.current = updatedFilters;
+
+    // Determine whether to auto-trigger a fetch. If the change includes anything
+    // other than searchTerm (e.g., difficulty or available), call refetch immediately.
+    const changedKeys = Object.keys(newFilters);
+    const shouldAutoFetch = changedKeys.some(k => k !== 'searchTerm');
+    if (shouldAutoFetch) {
+      refetchWithFilters(updatedFilters);
+    }
+  };
+
+  // Handle Enter key on the search input
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      // ensure the latest input value is used immediately
+      filtersRef.current = { ...filtersRef.current, searchTerm: e.currentTarget.value };
+      setFilters(filtersRef.current);
+      handleSearch();
+    }
   };
 
   // Handle search
   const handleSearch = () => {
-    refetchWithFilters(filters);
+    // Use the ref to avoid stale reads if the user just changed a control
+    const appliedFilters = filtersRef.current;
+    refetchWithFilters(appliedFilters);
   };
 
   // Handle select button click
@@ -128,6 +174,7 @@ const AddReadingModal: React.FC<AddReadingModalProps> = ({
   const handleClose = () => {
     setSelectedReadings([]);
     setFilters({ difficulty: null, available: null, searchTerm: '' });
+    filtersRef.current = { difficulty: null, available: null, searchTerm: '' };
     setWasSuccessful(false); // Reset success state
     onClose(false); // Pass false to indicate manual close (not success)
   };
@@ -240,7 +287,7 @@ const AddReadingModal: React.FC<AddReadingModalProps> = ({
                         placeholder="Search readings..."
                         value={filters.searchTerm}
                         onChange={(e) => handleFilterChange({ searchTerm: e.target.value })}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                        onKeyDown={handleInputKeyDown}
                       />
                       <button
                         className="btn btn-outline-secondary"
