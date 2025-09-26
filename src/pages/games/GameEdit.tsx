@@ -30,7 +30,13 @@ const GameEdit: React.FC = () => {
 
   // Handle form submission for game details
   const handleSubmit = async (values: any) => {
-    await updateGame(values);
+    let fixedValues = { ...values };
+    if (typeof fixedValues.type === 'string') {
+      const found = GAME_TYPES.find(opt => opt.label === fixedValues.type);
+      if (found) fixedValues.type = found.value;
+      else fixedValues.type = Number(fixedValues.type);
+    }
+    await updateGame(fixedValues);
   };
 
   // Word list columns
