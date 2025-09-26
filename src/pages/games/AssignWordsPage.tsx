@@ -276,7 +276,6 @@ const AssignWordsPage: React.FC = () => {
   useEffect(() => {
     if (game && game.prerequisite_reading_id) {
       const readingId = game.prerequisite_reading_id.toString();
-      console.log('Setting currentReadingId:', readingId);
       setCurrentReadingId(readingId);
     }
   }, [game]);
