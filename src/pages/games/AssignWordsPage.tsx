@@ -652,36 +652,35 @@ const AssignWordsPage: React.FC = () => {
           onFinish={async (values) => {
             try {
               const formData = new FormData();
-              
               // Append word data fields
               formData.append('word', values.word);
               formData.append('type', values.type.toString());
               formData.append('level', values.level.toString());
               formData.append('note', values.note || '');
               formData.append('is_active', '1');
-              
               // Append file if exists
               if (values.image) {
                 formData.append('image', values.image);
               }
-
               const newWord = await createWord(formData);
+              // Cập nhật lại allWords (nếu có API trả về đầy đủ thì nên fetch lại, ở đây chỉ cập nhật tạm)
+              setAvailableWords(prev => {
+                // Nếu từ mới thuộc level hiện tại và chưa được gán thì thêm vào availableWords
+                if (newWord.level === parseInt(selectedLevel)) {
+                  const allAssignedWordIds = new Set<number>();
+                  Object.values(allLevelAssignments).forEach(levelWords => {
+                    levelWords.forEach(word => allAssignedWordIds.add(word.id));
+                  });
+                  if (!allAssignedWordIds.has(newWord.id)) {
+                    return [...prev, newWord];
+                  }
+                }
+                return prev;
+              });
               toast.success('Word created successfully');
               setIsCreateModalVisible(false);
               form.resetFields();
-              
-              // Add new word to available words list only if it matches current level
-              // and it's not already assigned to any level
-              if (newWord.level === parseInt(selectedLevel)) {
-                const allAssignedWordIds = new Set<number>();
-                Object.values(allLevelAssignments).forEach(levelWords => {
-                  levelWords.forEach(word => allAssignedWordIds.add(word.id));
-                });
-                
-                if (!allAssignedWordIds.has(newWord.id)) {
-                  setAvailableWords(prev => [...prev, newWord]);
-                }
-              }
+              location.reload();
             } catch (error) {
               toast.error('Failed to create word');
             }
@@ -772,35 +771,23 @@ const AssignWordsPage: React.FC = () => {
             
             try {
               const formData = new FormData();
-              
               formData.append('word', values.word);
               formData.append('type', values.type.toString());
               formData.append('level', values.level.toString());
               formData.append('note', values.note || '');
               formData.append('is_active', '1');
-              
               if (values.image && values.image[0] && values.image[0].originFileObj) {
                 formData.append('image', values.image[0].originFileObj);
               }
-
               const updatedWord = await editWord(editingWord.id, formData);
-              window.location.reload();
-              toast.success('Word updated successfully');
-              
-              // Update the word in local state
+              // Cập nhật lại state thay vì reload trang
               const updateWordInState = (words: Word[]) => {
                 return words.map(word => 
                   word.id === editingWord.id ? { ...updatedWord } : word
                 );
               };
-              
-              // Update available words if the word is in current available list
               setAvailableWords(prev => updateWordInState(prev));
-              
-              // Update assigned words if the word is in current assigned list
               setAssignedWords(prev => updateWordInState(prev));
-              
-              // Update persistent assignments
               setAllLevelAssignments(prev => {
                 const updated = { ...prev };
                 Object.keys(updated).forEach(level => {
@@ -808,10 +795,11 @@ const AssignWordsPage: React.FC = () => {
                 });
                 return updated;
               });
-              
+              toast.success('Word updated successfully');
               setIsEditModalVisible(false);
               setEditingWord(null);
               editForm.resetFields();
+              location.reload();
             } catch (error) {
               toast.error('Failed to update word');
             }
