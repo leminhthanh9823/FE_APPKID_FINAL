@@ -570,9 +570,8 @@ const AssignWordsPage: React.FC = () => {
       } else {
         navigate('/games');
       }
-    } catch (error) {
-      toast.error('Failed to assign words');
-      console.error('Save error:', error);
+    } catch (error: any) {
+      toast.error(error);
     }
   };
 
@@ -943,8 +942,8 @@ const AssignWordsPage: React.FC = () => {
               setIsEditModalVisible(false);
               setEditingWord(null);
               editForm.resetFields();
-            } catch (error) {
-              toast.error('Failed to update word');
+            } catch (error :any) {
+              toast.error(error);
             }
           }}
         >
