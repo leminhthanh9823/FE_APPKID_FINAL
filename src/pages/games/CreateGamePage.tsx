@@ -62,6 +62,8 @@ const CreateGamePage: React.FC = () => {
       });
 
       let parsedNewGame : ResponseCreateGameDto = newGame;
+      const gid = (parsedNewGame as any).id;
+
       toast.success('Game created successfully');
        if (
         parsedNewGame &&
@@ -83,11 +85,10 @@ const CreateGamePage: React.FC = () => {
           allowOutsideClick: false,
           customClass: { container: 'swal-high-z-index' }
         });
-        const gid = (parsedNewGame as any).id;
         // If user chooses to go to update (cancel), navigate to edit screen
         if (result.isDismissed || result.isDenied || result.isDismissed) {
           navigate(`/games/${gid}/edit`);
-        } else if (result.isConfirmed) {
+        } else if (result.isConfirmed) {  
           await addGamesToPath(
             parsedNewGame.pathItem.pathId,
             parsedNewGame.pathItem.pathCategoryId,
@@ -96,6 +97,8 @@ const CreateGamePage: React.FC = () => {
           );
           navigate(`/games/${gid}/edit`);
         }
+      } else {
+        navigate(`/games/${gid}/edit`);
       }
     } catch (error) {
       if (error instanceof Error) {
