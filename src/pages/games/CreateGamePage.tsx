@@ -57,19 +57,18 @@ const CreateGamePage: React.FC = () => {
   const handleGameCreation = async (formData: GameFormData) => {
     setLoading(true);
     try {
-      const newGame = await createGame({
-        ...formData,
-      });
+      const newGame = await createGame({ ...formData });
 
-      let parsedNewGame : ResponseCreateGameDto = newGame;
+      const parsedNewGame: ResponseCreateGameDto = newGame;
       toast.success('Game created successfully');
-       if (
-        parsedNewGame &&
-        parsedNewGame.pathItem &&
+
+      if (
+        parsedNewGame?.pathItem &&
         parsedNewGame.pathItem.pathId !== undefined &&
         parsedNewGame.pathItem.pathCategoryId !== undefined
       ) {
         const pathName = parsedNewGame.pathItem.pathName || 'this path';
+
         const result = await Swal.fire({
           title: `We found that`,
           html: `This reading already in a learning path "<b>${pathName}</b>"<br>Do you want to add it to the path now?`,
@@ -81,28 +80,24 @@ const CreateGamePage: React.FC = () => {
           cancelButtonColor: '#d33',
           backdrop: true,
           allowOutsideClick: false,
-          customClass: { container: 'swal-high-z-index' }
+          customClass: { container: 'swal-high-z-index' },
         });
+
         const gid = (parsedNewGame as any).id;
-        // If user chooses to go to update (cancel), navigate to edit screen
-        if (result.isDismissed || result.isDenied || result.isDismissed) {
-          navigate(`/games/${gid}/edit`);
-        } else if (result.isConfirmed) {
+
+        if (result.isConfirmed) {
           await addGamesToPath(
             parsedNewGame.pathItem.pathId,
             parsedNewGame.pathItem.pathCategoryId,
             parseInt(readingId!),
             [gid],
           );
-          navigate(`/games/${gid}/edit`);
         }
+        navigate(`/games/${gid}/edit`);
       }
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error('Failed to create game');
-      }
+    } catch (error: any) {
+      console.log(error);
+        toast.error(error);
     } finally {
       setLoading(false);
     }
@@ -117,7 +112,7 @@ const CreateGamePage: React.FC = () => {
       order: selectedWords.length + 1,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      word: word // Include the original word for display purposes
+      word: word
     };
     setSelectedWords([...selectedWords, gameWord]);
   };
