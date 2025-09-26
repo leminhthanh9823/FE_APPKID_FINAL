@@ -313,17 +313,24 @@ const AssignWordsPage: React.FC = () => {
       });
 
       const currentLevelWords = allWords.filter(w => w.level === parseInt(selectedLevel));
-      const available = currentLevelWords.filter(w => !allAssignedWordIds.has(w.id));
       let assigned = allLevelAssignments[selectedLevel] || [];
 
-      // If game type is single-word, only allow 1 assigned word
-      if (game && SINGLE_WORD_TYPES.includes(game.type) && assigned.length > 1) {
-        assigned = assigned.slice(0, 1);
+      if (game && SINGLE_WORD_TYPES.includes(game.type)) {
+        let firstAssigned: Word | undefined;
+        for (const levelWords of Object.values(allLevelAssignments)) {
+          if (levelWords && levelWords.length > 0) {
+            firstAssigned = levelWords[0];
+            break;
+          }
+        }
+        assigned = firstAssigned ? [firstAssigned] : [];
+        setAvailableWords(currentLevelWords.filter(w => !firstAssigned || w.id !== firstAssigned.id));
+      } else {
+        setAvailableWords(currentLevelWords.filter(w => !allAssignedWordIds.has(w.id)));
       }
-      setAvailableWords(available);
       setAssignedWords(assigned);
     }
-  }, [allWords, selectedLevel, allLevelAssignments]);
+  }, [allWords, selectedLevel, allLevelAssignments, game]);
 
   const filteredAvailableWords = React.useMemo(() => 
     availableWords.filter(word => 
@@ -334,7 +341,6 @@ const AssignWordsPage: React.FC = () => {
   const handleDragEnd = React.useCallback((result: DropResult) => {
     if (!result.destination) return;
     const { source, destination } = result;
-    // If game type is single-word, only allow 1 assigned word
     if (game && SINGLE_WORD_TYPES.includes(game.type)) {
       if (source.droppableId === 'available' && destination.droppableId === 'assigned') {
         if (assignedWords.length >= 1) {
@@ -344,7 +350,6 @@ const AssignWordsPage: React.FC = () => {
       }
     }
     if (source.droppableId === destination.droppableId) {
-      // Reordering within the same list
       if (source.droppableId === 'available') {
         setAvailableWords(prev => {
           const items = Array.from(prev);
