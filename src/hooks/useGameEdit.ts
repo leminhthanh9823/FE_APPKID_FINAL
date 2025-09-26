@@ -26,7 +26,7 @@ export const useGameEdit = (gameId: string) => {
 
   const fetchGame = async () => {
     try {
-      const response = await apiClient.get(`/game/teacher/games/${gameId}`);
+      const response = await apiClient.get(`/game/teacher/games/${gameId}/cms`);
       if (response.data.success) {
         const gameData = response.data.data;
         setGame(gameData);
