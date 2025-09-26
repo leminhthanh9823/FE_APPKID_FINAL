@@ -1,6 +1,6 @@
 import { Card, Tag, Button, Dropdown, MenuProps, Statistic, Space, Divider } from 'antd';
 import { EllipsisOutlined, PictureOutlined, UserOutlined, BookOutlined, ReadOutlined } from '@ant-design/icons';
-import { Game, GameType, GameStatus } from '../../../types/game';
+import { Game, GameType, GAME_TYPE_LABELS, GameStatus } from '../../../types/game';
 import styled from 'styled-components';
 
 interface GameCardProps {
@@ -140,9 +140,9 @@ const GameCard: React.FC<GameCardProps> = ({
     return isActive ? 'Active' : 'Inactive';
   };
 
-  const getGameTypeName = (type: number) => {
-    const gameTypes = Object.values(GameType);
-    return gameTypes[type - 1] || 'Unknown';
+
+  const getGameTypeLabel = (type: number) => {
+    return GAME_TYPE_LABELS[type as GameType] || 'Unknown';
   };
 
   const menuItems = [
@@ -211,7 +211,7 @@ const GameCard: React.FC<GameCardProps> = ({
       </div>
       
       <div className="game-meta">
-        <Tag>{getGameTypeName(game.type).replace(/_/g, ' ')}</Tag>
+        <Tag>{getGameTypeLabel(game.type)}</Tag>
         <Tag color={getStatusColor(game.is_active)}>{getStatusText(game.is_active)}</Tag>
       </div>
     </StyledCard>

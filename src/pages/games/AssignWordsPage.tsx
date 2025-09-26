@@ -291,7 +291,7 @@ interface WordsResponse {
 
 const AssignWordsPage: React.FC = () => {
   // Only allow 1 word for these types
-  const SINGLE_WORD_TYPES = ['image_puzzle', 'four_pics_one_word'];
+  const SINGLE_WORD_TYPES = [5, 6];
   const { gameId } = useParams();
   const navigate = useNavigate();
   const [searchText, setSearchText] = useState('');
@@ -810,8 +810,8 @@ const AssignWordsPage: React.FC = () => {
               toast.success('Word created successfully');
               setIsCreateModalVisible(false);
               form.resetFields();
-            } catch (error) {
-              toast.error('Failed to create word');
+            } catch (error: any) {
+              toast.error(error);
             }
           }}
         >
