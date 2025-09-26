@@ -240,19 +240,26 @@ const EditItems = () => {
         return;
       }
 
-      // Find the category containing this reading
       const categoryIndex = newCategories.findIndex(cat => 
-        cat.items.some(item => item.reading_id && item.reading_id.toString() === readingId)
+        cat.items.some(item => item.reading_id && item.id.toString() === readingId)
       );
-
-      if (categoryIndex === -1) return;
 
       const category = { ...newCategories[categoryIndex] };
       const originalItems = [...category.items];
       
-      // Get games for this specific reading and reorder them
+      const readingItem = category.items.find(item => 
+        item.reading_id && item.id.toString() === readingId
+      );
+      
+      if (!readingItem || !readingItem.reading_id) {
+        console.error('Reading item not found or missing reading_id for ID:', readingId);
+        return;
+      }
+      
+      const actualReadingId = readingItem.reading_id;
+      
       const thisReadingGames = category.items.filter(item => 
-        item.game_id && item.prerequisite_reading_id && item.prerequisite_reading_id.toString() === readingId
+        item.game_id && item.prerequisite_reading_id && item.prerequisite_reading_id === actualReadingId
       );
       
       const [movedGame] = thisReadingGames.splice(source.index, 1);
@@ -271,7 +278,7 @@ const EditItems = () => {
         reconstructedItems.push({ ...reading, sequence_order: sequenceCounter++ });
         
         // Add games belonging to this reading with sequential order
-        const readingGames = reading.reading_id?.toString() === readingId 
+        const readingGames = reading.reading_id === actualReadingId 
           ? thisReadingGames  // Use reordered games for the affected reading
           : allGames.filter(game => game.prerequisite_reading_id === reading.reading_id);
         
