@@ -53,7 +53,6 @@ export const TYPE_NOTIFY_OPTIONS = [
 export const TYPE_TARGET_OPTIONS = [
   { value: 0, label: 'All' },
   { value: 1, label: 'Parents' },
-  { value: 2, label: 'Students' },
 ]
 
 export const FEEDBACK_CATEGORY_OPTIONS = [
