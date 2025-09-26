@@ -1,27 +1,8 @@
 import { useState, useEffect } from 'react';
 import apiClient from '../apis/apiRequest';
-import { message } from 'antd';
 import { Game } from '../types/game';
 import { Word, GameWord } from '../types/word';
-import { ApiResponse } from '../types/api';
 import { toast } from 'react-toastify';
-
-interface WordsResponse {
-  words: Word[];
-  pagination: {
-    total: number;
-    totalPages: number;
-    currentPage: number;
-    limit: number;
-  };
-}
-
-interface GameWordAssignment {
-  wordId: number;
-  level: number;
-  isActive: boolean;
-  order: number;
-}
 
 export const useGameEdit = (gameId: string) => {
   const [game, setGame] = useState<Game | null>(null);
@@ -132,9 +113,8 @@ export const useGameEdit = (gameId: string) => {
         setGame(response.data.data);
         toast.success('Game updated successfully');
       }
-    } catch (error) {
-      console.error('Failed to update game:', error);
-      toast.error('Failed to update game');
+    } catch (error: any) {
+      toast.error(error);
     } finally {
       setLoading(false);
     }

@@ -423,24 +423,41 @@ const AssignWordsPage: React.FC = () => {
   }, [allWords, gameWords]);
 
   useEffect(() => {
-    // Set assigned words for current level
-    let assigned = allLevelAssignments[selectedLevel] || [];
+    if (allWords) {
+      const allAssignedWordIds = new Set<number>();
+      Object.values(allLevelAssignments).forEach(levelWords => {
+        levelWords.forEach(word => allAssignedWordIds.add(word.id));
+      });
 
-    // If game type is single-word, only allow 1 assigned word
-    if (game && SINGLE_WORD_TYPES.includes(game.type) && assigned.length > 1) {
-      assigned = assigned.slice(0, 1);
+      const currentLevelWords = allWords.filter(w => w.level === parseInt(selectedLevel));
+      let assigned = allLevelAssignments[selectedLevel] || [];
+
+      if (game && SINGLE_WORD_TYPES.includes(game.type)) {
+        let firstAssigned: Word | undefined;
+        for (const levelWords of Object.values(allLevelAssignments)) {
+          if (levelWords && levelWords.length > 0) {
+            firstAssigned = levelWords[0];
+            break;
+          }
+        }
+        assigned = firstAssigned ? [firstAssigned] : [];
+        setAvailableWords(currentLevelWords.filter(w => !firstAssigned || w.id !== firstAssigned.id));
+      } else {
+        setAvailableWords(currentLevelWords.filter(w => !allAssignedWordIds.has(w.id)));
+      }
+      setAssignedWords(assigned);
     }
-    setAssignedWords(assigned);
-    
-    // Reset pagination when level changes
-    setCurrentPage(1);
-  }, [selectedLevel, allLevelAssignments, game]);
+  }, [allWords, selectedLevel, allLevelAssignments, game]);
+
+  const filteredAvailableWords = React.useMemo(() => 
+    availableWords.filter(word => 
+      word.word.toLowerCase().includes(debouncedSearchText.toLowerCase())
+    ), [availableWords, debouncedSearchText]
+  );
 
   const handleDragEnd = React.useCallback((result: DropResult) => {
     if (!result.destination) return;
     const { source, destination } = result;
-    
-    // If game type is single-word, only allow 1 assigned word
     if (game && SINGLE_WORD_TYPES.includes(game.type)) {
       if (source.droppableId === 'available' && destination.droppableId === 'assigned') {
         if (assignedWords.length >= 1) {
@@ -451,7 +468,6 @@ const AssignWordsPage: React.FC = () => {
     }
     
     if (source.droppableId === destination.droppableId) {
-      // Reordering within the same list
       if (source.droppableId === 'available') {
         setAvailableWords(prev => {
           const items = Array.from(prev);
@@ -554,9 +570,8 @@ const AssignWordsPage: React.FC = () => {
       } else {
         navigate('/games');
       }
-    } catch (error) {
-      toast.error('Failed to assign words');
-      console.error('Save error:', error);
+    } catch (error: any) {
+      toast.error(error);
     }
   };
 
@@ -927,8 +942,8 @@ const AssignWordsPage: React.FC = () => {
               setIsEditModalVisible(false);
               setEditingWord(null);
               editForm.resetFields();
-            } catch (error) {
-              toast.error('Failed to update word');
+            } catch (error :any) {
+              toast.error(error);
             }
           }}
         >

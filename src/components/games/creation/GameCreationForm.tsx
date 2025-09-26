@@ -86,6 +86,7 @@ export const GameCreationForm: React.FC<GameCreationFormProps> = ({
             name="image"
             label="Game Image"
             valuePropName="fileList"
+            rules={[{ required: true, message: 'Please upload a game image' }]}
             getValueFromEvent={(e) => {
               if (Array.isArray(e)) {
                 return e;
