@@ -308,7 +308,7 @@ const GameItem: React.FC<GameItemProps> = ({
                   title="Remove game"
                 >
                   <i className="bi bi-trash me-1"></i>
-                  Xóa
+                  Remove 
                 </button>
               </div>
             </div>
