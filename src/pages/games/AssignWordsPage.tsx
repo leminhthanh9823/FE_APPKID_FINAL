@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Button, Input, Tabs, Space, Tag, Spin, Modal, Form, Select, Upload } from 'antd';
+import { Card, Button, Input, Tabs, Space, Tag, Spin, Modal, Form, Select, Upload, Pagination } from 'antd';
 import { toast } from 'react-toastify';
 import { SearchOutlined, PlusOutlined, UploadOutlined, EditOutlined } from '@ant-design/icons';
 import useGameEdit from '../../hooks/useGameEdit';
@@ -10,6 +10,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautif
 import useCreateWord from '../../hooks/useCreateWord';
 import useEditWord from '../../hooks/useEditWord';
 import styled from 'styled-components';
+import apiClient from '@/apis/apiRequest';
 
 const WordItemStyled = styled.div.withConfig({
   shouldForwardProp: (prop) => prop !== 'isDragging',
@@ -236,6 +237,58 @@ const ActionButtonsContainer = styled.div`
   }
 `;
 
+const PaginationContainer = styled.div`
+  margin-top: 16px;
+  text-align: center;
+  padding: 16px 0;
+  border-top: 1px solid #e8f4fd;
+  
+  .ant-pagination {
+    .ant-pagination-item-active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-color: #667eea;
+      
+      a {
+        color: white;
+      }
+    }
+    
+    .ant-pagination-item:hover {
+      border-color: #667eea;
+      
+      a {
+        color: #667eea;
+      }
+    }
+    
+    .ant-pagination-prev:hover .ant-pagination-item-link,
+    .ant-pagination-next:hover .ant-pagination-item-link {
+      border-color: #667eea;
+      color: #667eea;
+    }
+  }
+`;
+
+// Interface for pagination
+interface WordsPagination {
+  total: number;
+  totalPages: number;
+  currentPage: number;
+  limit: number;
+}
+
+// Interface for API response
+interface WordsResponse {
+  success: boolean;
+  message: string;
+  status: number;
+  errors: null;
+  data: {
+    words: Word[];
+    pagination: WordsPagination;
+  };
+}
+
 const AssignWordsPage: React.FC = () => {
   // Only allow 1 word for these types
   const SINGLE_WORD_TYPES = ['image_puzzle', 'four_pics_one_word'];
@@ -245,10 +298,18 @@ const AssignWordsPage: React.FC = () => {
   const [debouncedSearchText, setDebouncedSearchText] = useState('');
   const [selectedLevel, setSelectedLevel] = useState('1');
   const [currentReadingId, setCurrentReadingId] = useState<string>('');
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalWords, setTotalWords] = useState(0);
+  const [loadingWords, setLoadingWords] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchText(searchText);
+      // Reset to first page when search changes
+      setCurrentPage(1);
     }, 300);
 
     return () => clearTimeout(timer);
@@ -272,6 +333,63 @@ const AssignWordsPage: React.FC = () => {
     loading,
     updateGameWords
   } = useGameEdit(gameId || '');
+
+  // Function to fetch words with pagination
+  const fetchWords = async (page: number = currentPage, search: string = debouncedSearchText) => {
+    setLoadingWords(true);
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: pageSize.toString(),
+        level: selectedLevel,
+      });
+      
+      if (search.trim()) {
+        params.append('search', search.trim());
+      }
+
+      const response = await apiClient.get(`/word?${params}`);
+
+      const data: WordsResponse = response.data;
+
+      if (data.success) {
+        setTotalWords(data.data.pagination.total);
+        return data.data.words;
+      } else {
+        throw new Error(data.message || 'Failed to fetch words');
+      }
+    } catch (error) {
+      console.error('Error fetching words:', error);
+      toast.error('Failed to fetch words');
+      return [];
+    } finally {
+      setLoadingWords(false);
+    }
+  };
+
+  // Effect to fetch words when page, level, or search changes
+  useEffect(() => {
+    if (selectedLevel) {
+      fetchWords(currentPage, debouncedSearchText).then(words => {
+        // Filter out already assigned words
+        const allAssignedWordIds = new Set<number>();
+        Object.values(allLevelAssignments).forEach(levelWords => {
+          levelWords.forEach(word => allAssignedWordIds.add(word.id));
+        });
+        
+        const available = words.filter(w => !allAssignedWordIds.has(w.id));
+        setAvailableWords(available);
+      });
+    }
+  }, [currentPage, debouncedSearchText, selectedLevel, allLevelAssignments]);
+
+  // Handle pagination change
+  const handlePageChange = (page: number, size?: number) => {
+    setCurrentPage(page);
+    if (size && size !== pageSize) {
+      setPageSize(size);
+    }
+  };
 
   useEffect(() => {
     if (game && game.prerequisite_reading_id) {
@@ -305,34 +423,23 @@ const AssignWordsPage: React.FC = () => {
   }, [allWords, gameWords]);
 
   useEffect(() => {
-    if (allWords) {
-      const allAssignedWordIds = new Set<number>();
-      Object.values(allLevelAssignments).forEach(levelWords => {
-        levelWords.forEach(word => allAssignedWordIds.add(word.id));
-      });
+    // Set assigned words for current level
+    let assigned = allLevelAssignments[selectedLevel] || [];
 
-      const currentLevelWords = allWords.filter(w => w.level === parseInt(selectedLevel));
-      const available = currentLevelWords.filter(w => !allAssignedWordIds.has(w.id));
-      let assigned = allLevelAssignments[selectedLevel] || [];
-
-      // If game type is single-word, only allow 1 assigned word
-      if (game && SINGLE_WORD_TYPES.includes(game.type) && assigned.length > 1) {
-        assigned = assigned.slice(0, 1);
-      }
-      setAvailableWords(available);
-      setAssignedWords(assigned);
+    // If game type is single-word, only allow 1 assigned word
+    if (game && SINGLE_WORD_TYPES.includes(game.type) && assigned.length > 1) {
+      assigned = assigned.slice(0, 1);
     }
-  }, [allWords, selectedLevel, allLevelAssignments]);
-
-  const filteredAvailableWords = React.useMemo(() => 
-    availableWords.filter(word => 
-      word.word.toLowerCase().includes(debouncedSearchText.toLowerCase())
-    ), [availableWords, debouncedSearchText]
-  );
+    setAssignedWords(assigned);
+    
+    // Reset pagination when level changes
+    setCurrentPage(1);
+  }, [selectedLevel, allLevelAssignments, game]);
 
   const handleDragEnd = React.useCallback((result: DropResult) => {
     if (!result.destination) return;
     const { source, destination } = result;
+    
     // If game type is single-word, only allow 1 assigned word
     if (game && SINGLE_WORD_TYPES.includes(game.type)) {
       if (source.droppableId === 'available' && destination.droppableId === 'assigned') {
@@ -342,6 +449,7 @@ const AssignWordsPage: React.FC = () => {
         }
       }
     }
+    
     if (source.droppableId === destination.droppableId) {
       // Reordering within the same list
       if (source.droppableId === 'available') {
@@ -368,11 +476,13 @@ const AssignWordsPage: React.FC = () => {
         const movedItem = availableWords[source.index];
         const newAvailableWords = availableWords.filter((_, index) => index !== source.index);
         const newAssignedWords = Array.from(assignedWords);
+        
         // If single-word type, only allow 1
         if (game && SINGLE_WORD_TYPES.includes(game.type) && newAssignedWords.length >= 1) {
           toast.error('This game type only allows 1 word.');
           return;
         }
+        
         newAssignedWords.splice(destination.index, 0, movedItem);
         setAvailableWords(newAvailableWords);
         setAssignedWords(newAssignedWords);
@@ -394,7 +504,7 @@ const AssignWordsPage: React.FC = () => {
         }));
       }
     }
-  }, [availableWords, assignedWords, selectedLevel]);
+  }, [availableWords, assignedWords, selectedLevel, game]);
 
   const handleEditWord = (word: Word) => {
     setEditingWord(word);
@@ -437,7 +547,8 @@ const AssignWordsPage: React.FC = () => {
       });
 
       await updateGameWords(allAssignments);
-  toast.success('Words assigned successfully');
+      toast.success('Words assigned successfully');
+      
       if (currentReadingId) {
         navigate(`/kid-reading/${currentReadingId}/games/${gameId}/edit`);
       } else {
@@ -539,29 +650,26 @@ const AssignWordsPage: React.FC = () => {
         <DragDropContext onDragEnd={handleDragEnd}>
           <DragDropContainer>
             <div>
-              <WordSectionHeader>Available Words ({filteredAvailableWords.length})</WordSectionHeader>
+              <WordSectionHeader>Available Words ({availableWords.length})</WordSectionHeader>
               <Droppable droppableId="available">
                 {(provided) => (
                   <WordContainer ref={provided.innerRef} {...provided.droppableProps}>
-                    {filteredAvailableWords.length === 0 ? (
+                    {loadingWords ? (
                       <div style={{ padding: '40px', textAlign: 'center', color: '#8c8c8c' }}>
-                        {loading ? (
-                          <div>
-                            <Spin size="large" />
-                            <p style={{ marginTop: '16px', fontSize: '16px' }}>Loading words...</p>
-                          </div>
-                        ) : (
-                          <div>
-                            <p style={{ fontSize: '16px', marginBottom: '8px' }}>No available words found</p>
-                            {allWords.length === 0 && (
-                              <p style={{ fontSize: '12px', color: '#bfbfbf' }}>
-                              </p>
-                            )}
-                          </div>
+                        <Spin size="large" />
+                        <p style={{ marginTop: '16px', fontSize: '16px' }}>Loading words...</p>
+                      </div>
+                    ) : availableWords.length === 0 ? (
+                      <div style={{ padding: '40px', textAlign: 'center', color: '#8c8c8c' }}>
+                        <p style={{ fontSize: '16px', marginBottom: '8px' }}>No available words found</p>
+                        {totalWords === 0 && (
+                          <p style={{ fontSize: '12px', color: '#bfbfbf' }}>
+                            Try adjusting your search or add new words
+                          </p>
                         )}
                       </div>
                     ) : (
-                      filteredAvailableWords.map((word, index) => (
+                      availableWords.map((word, index) => (
                         <WordItem key={word.id} word={word} index={index} onEdit={handleEditWord} />
                       ))
                     )}
@@ -569,6 +677,25 @@ const AssignWordsPage: React.FC = () => {
                   </WordContainer>
                 )}
               </Droppable>
+              
+              {/* Pagination for Available Words */}
+              {!loadingWords && totalWords > 0 && (
+                <PaginationContainer>
+                  <Pagination
+                    current={currentPage}
+                    total={totalWords}
+                    pageSize={pageSize}
+                    onChange={handlePageChange}
+                    onShowSizeChange={handlePageChange}
+                    showSizeChanger
+                    showQuickJumper
+                    showTotal={(total, range) => 
+                      `${range[0]}-${range[1]} of ${total} words`
+                    }
+                    pageSizeOptions={['5', '10', '20', '50']}
+                  />
+                </PaginationContainer>
+              )}
             </div>
 
             <div>
@@ -578,22 +705,14 @@ const AssignWordsPage: React.FC = () => {
                   <WordContainer ref={provided.innerRef} {...provided.droppableProps}>
                     {assignedWords.length === 0 ? (
                       <div style={{ padding: '40px', textAlign: 'center', color: '#8c8c8c' }}>
-                        {loading ? (
-                          <div>
-                            <Spin size="large" />
-                            <p style={{ marginTop: '16px', fontSize: '16px' }}>Loading selected words...</p>
-                          </div>
-                        ) : (
-                          <div>
-                            <p style={{ fontSize: '16px', marginBottom: '8px' }}>No words selected</p>
-                            <p style={{ fontSize: '14px', color: '#bfbfbf' }}>
-                              Drag words from Available Words to select them
-                            </p>
-                            {gameWords.length === 0 && (
-                              <p style={{ fontSize: '12px', color: '#bfbfbf', marginTop: '8px' }}>
-                              </p>
-                            )}
-                          </div>
+                        <p style={{ fontSize: '16px', marginBottom: '8px' }}>No words selected</p>
+                        <p style={{ fontSize: '14px', color: '#bfbfbf' }}>
+                          Drag words from Available Words to select them
+                        </p>
+                        {game && SINGLE_WORD_TYPES.includes(game.type) && (
+                          <p style={{ fontSize: '12px', color: '#ff7875', marginTop: '8px' }}>
+                            This game type only allows 1 word
+                          </p>
                         )}
                       </div>
                     ) : (
@@ -662,24 +781,20 @@ const AssignWordsPage: React.FC = () => {
                 formData.append('image', values.image);
               }
               const newWord = await createWord(formData);
-              // Cập nhật lại allWords (nếu có API trả về đầy đủ thì nên fetch lại, ở đây chỉ cập nhật tạm)
-              setAvailableWords(prev => {
-                // Nếu từ mới thuộc level hiện tại và chưa được gán thì thêm vào availableWords
-                if (newWord.level === parseInt(selectedLevel)) {
-                  const allAssignedWordIds = new Set<number>();
-                  Object.values(allLevelAssignments).forEach(levelWords => {
-                    levelWords.forEach(word => allAssignedWordIds.add(word.id));
-                  });
-                  if (!allAssignedWordIds.has(newWord.id)) {
-                    return [...prev, newWord];
-                  }
-                }
-                return prev;
+              
+              // Refresh the current page to show new word
+              fetchWords(currentPage, debouncedSearchText).then(words => {
+                const allAssignedWordIds = new Set<number>();
+                Object.values(allLevelAssignments).forEach(levelWords => {
+                  levelWords.forEach(word => allAssignedWordIds.add(word.id));
+                });
+                const available = words.filter(w => !allAssignedWordIds.has(w.id));
+                setAvailableWords(available);
               });
+              
               toast.success('Word created successfully');
               setIsCreateModalVisible(false);
               form.resetFields();
-              location.reload();
             } catch (error) {
               toast.error('Failed to create word');
             }
@@ -779,26 +894,39 @@ const AssignWordsPage: React.FC = () => {
                 formData.append('image', values.image[0].originFileObj);
               }
               const updatedWord = await editWord(editingWord.id, formData);
-              // Cập nhật lại state thay vì reload trang
-              const updateWordInState = (words: Word[]) => {
-                return words.map(word => 
+              
+              // Refresh the words to show updated data
+              fetchWords(currentPage, debouncedSearchText).then(words => {
+                const allAssignedWordIds = new Set<number>();
+                Object.values(allLevelAssignments).forEach(levelWords => {
+                  levelWords.forEach(word => allAssignedWordIds.add(word.id));
+                });
+                const available = words.filter(w => !allAssignedWordIds.has(w.id));
+                setAvailableWords(available);
+              });
+              
+              // Update assigned words if the edited word is in assigned list
+              setAssignedWords(prev => 
+                prev.map(word => 
                   word.id === editingWord.id ? { ...updatedWord } : word
-                );
-              };
-              setAvailableWords(prev => updateWordInState(prev));
-              setAssignedWords(prev => updateWordInState(prev));
+                )
+              );
+              
+              // Update all level assignments
               setAllLevelAssignments(prev => {
                 const updated = { ...prev };
                 Object.keys(updated).forEach(level => {
-                  updated[level] = updateWordInState(updated[level]);
+                  updated[level] = updated[level].map(word => 
+                    word.id === editingWord.id ? { ...updatedWord } : word
+                  );
                 });
                 return updated;
               });
+              
               toast.success('Word updated successfully');
               setIsEditModalVisible(false);
               setEditingWord(null);
               editForm.resetFields();
-              location.reload();
             } catch (error) {
               toast.error('Failed to update word');
             }
