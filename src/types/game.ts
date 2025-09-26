@@ -1,6 +1,6 @@
 export enum GameType {
   Wordle = 'Wordle',
-  Puzzle = 'Puzzle',
+  // Puzzle = 'Puzzle',
   MemoryGame = 'Memory Game',
   MissingWord = 'Missing Word',
   ImagePuzzle = 'Image Puzzle',

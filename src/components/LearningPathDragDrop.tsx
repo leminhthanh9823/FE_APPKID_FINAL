@@ -299,7 +299,7 @@ const GameItem: React.FC<GameItemProps> = ({
                   title="Edit game"
                 >
                   <i className="bi bi-pencil me-1"></i>
-                  Sửa
+                  Edit
                 </button>
                 <button
                   className="btn btn-danger btn-sm d-flex align-items-center"
@@ -308,7 +308,7 @@ const GameItem: React.FC<GameItemProps> = ({
                   title="Remove game"
                 >
                   <i className="bi bi-trash me-1"></i>
-                  Xóa
+                  Remove 
                 </button>
               </div>
             </div>

@@ -53,7 +53,6 @@ export const TYPE_NOTIFY_OPTIONS = [
 export const TYPE_TARGET_OPTIONS = [
   { value: 0, label: 'All' },
   { value: 1, label: 'Parents' },
-  { value: 2, label: 'Students' },
 ]
 
 export const FEEDBACK_CATEGORY_OPTIONS = [
@@ -121,7 +120,7 @@ export const SEARCH_AVAILABLE_READING = [
 
 export const GAME_TYPES = [
   { value: 1, label: 'Wordle' },
-  { value: 2, label: 'Puzzle' }, 
+  // { value: 2, label: 'Puzzle' }, 
   { value: 3, label: 'Memory Game' },
   { value: 4, label: 'Missing Word' },
   { value: 5, label: 'Image Puzzle' },
