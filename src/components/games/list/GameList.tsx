@@ -57,10 +57,6 @@ const GameList: React.FC<GameListProps> = ({
       }
     }
 
-    if (filters.type && game.type !== Object.values(GameType).indexOf(filters.type)) {
-      return false;
-    }
-
     if (filters.status && filters.status === GameStatus.PUBLISHED && !game.is_active) {
       return false;
     }

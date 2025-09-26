@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Input, Select, Card } from 'antd';
-import { GameStatus, GameType, GameFilters as IGameFilters } from '../../../types/game';
+import { GameStatus, GameType, GAME_TYPE_LABELS, GameFilters as IGameFilters } from '../../../types/game';
 
 const { Search } = Input;
 
@@ -31,10 +31,12 @@ const GameFilters: React.FC<GameFiltersProps> = ({
     onFiltersChange(newFilters);
   };
 
-  const gameTypes = Object.values(GameType).map(type => ({
-    value: type,
-    label: type.replace(/_/g, ' ')
-  }));
+  const gameTypes = Object.values(GameType)
+    .filter((type) => typeof type === 'number')
+    .map((type) => ({
+      value: type,
+      label: GAME_TYPE_LABELS[type as GameType] || String(type)
+    }));
 
   return (
     <Card className="game-filters mb-4">

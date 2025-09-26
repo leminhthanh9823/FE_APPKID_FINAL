@@ -1,11 +1,20 @@
 export enum GameType {
-  Wordle = 'Wordle',
-  // Puzzle = 'Puzzle',
-  MemoryGame = 'Memory Game',
-  MissingWord = 'Missing Word',
-  ImagePuzzle = 'Image Puzzle',
-  FourPicturesOneWord = 'Four Pictures One Word',
+  Wordle = 1,
+  // Puzzle = 2,
+  MemoryGame = 3,
+  MissingWord = 4,
+  ImagePuzzle = 5,
+  FourPicturesOneWord = 6,
 }
+
+export const GAME_TYPE_LABELS: Record<GameType, string> = {
+  [GameType.Wordle]: 'Wordle',
+  // [GameType.Puzzle]: 'Puzzle',
+  [GameType.MemoryGame]: 'Memory Game',
+  [GameType.MissingWord]: 'Missing Word',
+  [GameType.ImagePuzzle]: 'Image Puzzle',
+  [GameType.FourPicturesOneWord]: 'Four Pictures One Word',
+};
 
 export interface PrerequisiteReading {
   id: number;
@@ -16,7 +25,7 @@ export interface Game {
   id: number;
   name: string;
   description?: string;
-  type: string;
+  type: number; // now number, not string
   image: string;
   prerequisite_reading_id?: number;
   sequence_order: number;
@@ -50,7 +59,7 @@ export enum GameStatus {
 
 export interface GameFilters {
   search?: string;
-  type?: GameType;
+  type?: number; // now number, to match value in GAME_TYPES
   status?: GameStatus;
   readingId?: string;
 }
